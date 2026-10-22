@@ -206,6 +206,22 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  /* ---------- Main : Portfolio 목록 썸네일 (모바일·태블릿) ---------- */
+  // 각 줄(카테고리)의 .pf-works 첫 번째 작업 이미지(영상은 poster)를 썸네일로 사용 → 작업 데이터만 바꾸면 썸네일도 따라 바뀜
+  // 이미지가 없거나 불러오지 못하면 썸네일 칸 배경색(회색)만 표시
+  document.querySelectorAll('.pf-list .pf-row').forEach(function (row) {
+    var thumb = row.querySelector('.pf-thumb img');
+    var json = row.parentElement.querySelector('script.pf-works');
+    if (!thumb || !json) return;
+    var data = {};
+    try { data = JSON.parse(json.textContent) || {}; } catch (err) { data = {}; }
+    var first = Array.isArray(data.works) ? data.works[0] : null;
+    var src = first && (data.type === 'video' ? first.poster : first.image);
+    if (!src) return;
+    thumb.addEventListener('error', function () { thumb.removeAttribute('src'); });
+    thumb.src = src;
+  });
+
   /* ---------- Main : Portfolio 상세 모달 ---------- */
   // 섹션 4 각 줄(카테고리)을 클릭하면 같은 줄의 <script class="pf-works"> 데이터로 공용 모달(#pfModal)에 작업을 표시
   // - 왼쪽 : 작업의 메인 페이지 캡처 1장 (web) 또는 영상 1개 (video)
