@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>페이지를 찾을 수 없습니다 | WANTS 원츠 브랜드 마케팅</title>
+  <!-- 없는 주소로 들어온 방문자 안내 (GitHub Pages 가 모든 깊이의 없는 주소에 이 파일을 보여줌)
+       → 상대 경로가 깨지지 않도록 외부 CSS·JS 없이 한 파일로 구성, 링크는 사이트 맨 위 기준 -->
+  <meta name="robots" content="noindex">
+  <meta name="naver-site-verification" content="0be1d38a32277d3f807ff47f5600100f4a78feac">
+  <meta name="google-site-verification" content="5590au6AvHIaxLP_ar-Pui5Kfb1oLPZaWEDGRQpZLmk">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 40px 20px;
+      font-family: 'Noto Sans KR', -apple-system, 'Malgun Gothic', sans-serif; color: #222; background: #fff;
+      word-break: keep-all; text-align: center;
+    }
+    .code { font-family: 'Inter', -apple-system, sans-serif; font-size: 96px; font-weight: 700; line-height: 1; color: #00a8ec; letter-spacing: -.02em; }
+    h1 { margin-top: 24px; font-size: 26px; font-weight: 700; letter-spacing: -.03em; }
+    p { margin-top: 14px; font-size: 16px; line-height: 1.7; color: #666; }
+    .btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 36px; }
+    .btns a {
+      display: inline-flex; align-items: center; height: 48px; padding: 0 26px 2px; border: 1.5px solid #222; border-radius: 40px;
+      font-size: 15px; font-weight: 500; color: #222; text-decoration: none; transition: background-color .3s, color .3s;
+    }
+    .btns a:first-child, .btns a:hover { background: #222; color: #fff; }
+    @media (max-width: 768px) { .code { font-size: 72px; } h1 { font-size: 21px; } p { font-size: 14px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="code">404</div>
+    <h1>요청하신 페이지를 찾을 수 없습니다</h1>
+    <p>주소가 바뀌었거나 삭제된 페이지입니다.<br>아래 버튼으로 원츠의 새 홈페이지를 둘러보세요.</p>
+    <div class="btns">
+      <a href="/" data-path="">메인으로 가기</a>
+      <a href="/contact.html" data-path="contact.html">문의하기</a>
+    </div>
+  </main>
+  <script>
+    // 도메인 연결 전(wants24.github.io/wants-renewal/) 에도 링크가 맞도록 사이트 맨 위 경로 보정
+    (function () {
+      var base = /\.github\.io$/.test(location.hostname) ? '/' + location.pathname.split('/')[1] + '/' : '/';
+      document.querySelectorAll('[data-path]').forEach(function (a) { a.href = base + a.getAttribute('data-path'); });
+    })();
+  </script>
+</body>
+</html>
