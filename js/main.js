@@ -738,26 +738,98 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  /* ---------- Sub : Contact Form (임시) ---------- */
+  /* ---------- Sub : Contact Form (Web3Forms 전송) ---------- */
+  // 접근 키 : web3forms.com 에서 회사 이메일(wants24@naver.com)로 발급받은 Access Key 를 따옴표 안에 넣음
+  //           비어 있으면 전송하지 않고 전화 · 이메일 문의를 안내
+  var WEB3FORMS_KEY = '';
   var form = document.querySelector('.contact-form');
   if (form) {
+    var submitBtn = form.querySelector('[type="submit"]');
+    var submitLabel = submitBtn.textContent;
+    var statusBox = form.querySelector('.ct-form-status');
+    var agreeBox = form.querySelector('[name="privacy_agree"]');
+    var CONTACT_ALT = '전화 <a href="tel:051-916-7000">051-916-7000</a> 또는 이메일 <a href="mailto:wants24@naver.com">wants24@naver.com</a>으로 문의해 주세요.';
+    var sending = false;
+    var setStatus = function (type, html) {
+      statusBox.className = 'ct-form-status is-' + type;
+      statusBox.innerHTML = html;
+      statusBox.hidden = false;
+    };
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      alert('문의가 접수되었습니다. (임시 화면 - 실제 전송 기능은 추후 연동 예정)');
-      form.reset();
+      if (sending) return;
+      if (agreeBox && !agreeBox.checked) { // 동의하지 않으면 전송하지 않음
+        setStatus('error', '개인정보 수집·이용에 동의해 주셔야 상담 신청을 보낼 수 있습니다.');
+        agreeBox.focus();
+        return;
+      }
+      if (!form.reportValidity()) return; // 필수 입력 · 이메일 형식 확인
+      var bot = form.querySelector('[name="botcheck"]');
+      if (bot && bot.checked) return; // 허니팟이 체크됨 = 자동 입력 봇 → 조용히 무시
+      if (!WEB3FORMS_KEY) {
+        setStatus('error', '온라인 상담 신청을 준비하고 있습니다. ' + CONTACT_ALT);
+        return;
+      }
+
+      // 메일에서 알아보기 쉽도록 한글 항목 이름으로 보냄 (email 은 Web3Forms 가 회신 주소로 사용)
+      var fd = new FormData(form);
+      var payload = {
+        access_key: WEB3FORMS_KEY,
+        subject: '[홈페이지 상담 신청] ' + fd.get('name'),
+        from_name: 'WANTS 홈페이지',
+        '회사명 / 성함': fd.get('name'),
+        '연락처': fd.get('tel'),
+        '업종': fd.get('biz') || '-',
+        '관심 서비스': fd.getAll('svc').join(', ') || '-',
+        '문의 내용': fd.get('message') || '-',
+        '개인정보 수집·이용 동의': '동의함 (' + new Date().toLocaleString('ko-KR') + ')'
+      };
+      if (fd.get('email')) payload.email = fd.get('email');
+
+      sending = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = '전송 중…';
+      setStatus('sending', '상담 신청을 보내고 있습니다. 잠시만 기다려 주세요.');
+      var ctrl = window.AbortController ? new AbortController() : null;
+      var timer = ctrl && setTimeout(function () { ctrl.abort(); }, 15000); // 15초 안에 응답이 없으면 실패 처리
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(payload),
+        signal: ctrl ? ctrl.signal : undefined
+      })
+        .then(function (res) { return res.json().catch(function () { return {}; }); })
+        .then(function (json) {
+          if (!json || json.success !== true) throw new Error((json && json.message) || 'send failed');
+          form.reset();
+          setStatus('success', '상담 신청이 접수되었습니다. 내용을 확인한 뒤 남겨주신 연락처로 연락드리겠습니다.');
+        })
+        .catch(function () {
+          setStatus('error', '전송하지 못했습니다. 잠시 후 다시 시도하시거나 ' + CONTACT_ALT);
+        })
+        .then(function () {
+          clearTimeout(timer);
+          sending = false;
+          submitBtn.textContent = submitLabel;
+          updateSubmit();
+        });
     });
 
     // 신청 버튼 : 필수 입력(회사명/성함 · 연락처)과 개인정보 동의 체크가 모두 채워졌을 때만 활성화
-    var submitBtn = form.querySelector('[type="submit"]');
     var requiredFields = form.querySelectorAll('[required]');
     var updateSubmit = function () {
       var ok = Array.prototype.every.call(requiredFields, function (el) {
         return el.type === 'checkbox' ? el.checked : el.value.trim() !== '';
       });
-      submitBtn.disabled = !ok;
+      submitBtn.disabled = sending || !ok; // 전송 중에는 다시 누를 수 없게
     };
+    // 입력을 고치거나 동의에 체크하면 이전 오류 안내는 숨김
+    var clearError = function () { if (!sending && statusBox.classList.contains('is-error')) statusBox.hidden = true; };
     form.addEventListener('input', updateSubmit);
     form.addEventListener('change', updateSubmit);
+    form.addEventListener('input', clearError);
+    form.addEventListener('change', clearError);
     form.addEventListener('reset', function () { setTimeout(updateSubmit, 0); }); // 초기화 후 다시 비활성화
     updateSubmit();
   }

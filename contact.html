@@ -16,10 +16,15 @@
   <meta property="og:url" content="https://www.wants24.com/contact.html">
   <meta property="og:title" content="CONTACT | WANTS 원츠 브랜드 마케팅">
   <meta property="og:description" content="홈페이지, 블로그, 플레이스, SNS, 영상, 검색광고까지. 검색부터 AI 답변까지 연결되는 하나의 브랜드 구조를 만드는 원츠 브랜드 마케팅.">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://www.wants24.com/img/og-image.jpg"> <!-- 1200×630 · 이미지를 바꾸면 같은 이름으로 덮어쓰기 -->
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="WANTS 원츠 브랜드 마케팅">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="https://www.wants24.com/contact.html">
   <meta name="twitter:title" content="CONTACT | WANTS 원츠 브랜드 마케팅">
   <meta name="twitter:description" content="홈페이지, 블로그, 플레이스, SNS, 영상, 검색광고까지. 검색부터 AI 답변까지 연결되는 하나의 브랜드 구조를 만드는 원츠 브랜드 마케팅.">
+  <meta name="twitter:image" content="https://www.wants24.com/img/og-image.jpg">
   <link rel="icon" type="image/png" sizes="32x32" href="img/favicon.png">
   <link rel="apple-touch-icon" href="img/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -66,11 +71,13 @@
           <div class="ct-card-bg" aria-hidden="true"></div>
         </div>
 
-        <!-- 상담 신청 폼 (제출 처리 : js/main.js · 실제 전송은 추후 연동) -->
+        <!-- 상담 신청 폼 : Web3Forms 로 전송 (js/main.js · 접근 키는 WEB3FORMS_KEY 상수) -->
         <div class="ct-form-wrap reveal d1">
           <h3 class="ct-form-title">이 정도만 알려주셔도 첫 상담이 가능합니다.</h3>
           <p class="ct-form-desc">정리된 기획서가 없어도 괜찮습니다.<br>지금 어떤 부분이 답답한지부터 들으면 됩니다.</p>
-          <form class="contact-form ct-form" action="#" method="post">
+          <form class="contact-form ct-form" action="https://api.web3forms.com/submit" method="post" novalidate>
+            <!-- 스팸 방지 허니팟 : 사람에게는 보이지 않는 칸 (자동 입력 봇이 체크하면 전송하지 않음) -->
+            <input type="checkbox" name="botcheck" class="ct-botcheck" tabindex="-1" autocomplete="off" aria-hidden="true">
             <div class="row">
               <div class="field"><label for="cName">회사명 / 성함 <em>*</em></label><input type="text" id="cName" name="name" placeholder="회사명 또는 성함" required></div>
               <div class="field"><label for="cTel">연락처 <em>*</em></label><input type="tel" id="cTel" name="tel" placeholder="010-0000-0000" required></div>
@@ -92,13 +99,13 @@
             <fieldset class="field">
               <legend class="label">관심 서비스</legend>
               <div class="chk-group">
-                <label><input type="checkbox" name="svc" value="seo"><span>SEO·AEO·GEO</span></label>
-                <label><input type="checkbox" name="svc" value="web"><span>홈페이지</span></label>
-                <label><input type="checkbox" name="svc" value="blog"><span>블로그</span></label>
-                <label><input type="checkbox" name="svc" value="place"><span>플레이스</span></label>
-                <label><input type="checkbox" name="svc" value="sns"><span>SNS</span></label>
-                <label><input type="checkbox" name="svc" value="video"><span>영상</span></label>
-                <label><input type="checkbox" name="svc" value="ad"><span>검색광고</span></label>
+                <label><input type="checkbox" name="svc" value="SEO·AEO·GEO"><span>SEO·AEO·GEO</span></label>
+                <label><input type="checkbox" name="svc" value="홈페이지"><span>홈페이지</span></label>
+                <label><input type="checkbox" name="svc" value="블로그"><span>블로그</span></label>
+                <label><input type="checkbox" name="svc" value="플레이스"><span>플레이스</span></label>
+                <label><input type="checkbox" name="svc" value="SNS"><span>SNS</span></label>
+                <label><input type="checkbox" name="svc" value="영상"><span>영상</span></label>
+                <label><input type="checkbox" name="svc" value="검색광고"><span>검색광고</span></label>
               </div>
             </fieldset>
             <div class="field">
@@ -121,10 +128,23 @@
               </div>
               <textarea id="cMsg" name="message" placeholder="현재 운영 중인 채널과 고민을 자유롭게 적어주세요."></textarea>
             </div>
+            <!-- 개인정보 수집·이용 안내 (개인정보 보호법 제15조 · 자세한 내용은 privacy.html) -->
+            <div class="ct-privacy" id="ctPrivacy">
+              <strong class="ct-privacy-title">개인정보 수집·이용 안내</strong>
+              <dl>
+                <dt>수집 항목</dt><dd>(필수) 회사명 또는 성함, 연락처 · (선택) 이메일, 업종, 관심 서비스, 문의 내용</dd>
+                <dt>수집 목적</dt><dd>상담 신청 확인, 상담 진행 및 회신</dd>
+                <dt>보유 기간</dt><dd>상담 완료 후 1년간 보관 후 파기 (관계 법령에 보존 의무가 있으면 그 기간)</dd>
+                <dt>국외 이전</dt><dd>신청 내용은 폼 전송 서비스 Web3Forms(Web3Creative · 인도, AWS 서버)를 거쳐 전달·보관됩니다.</dd>
+              </dl>
+              <p>개인정보 수집·이용에 동의하지 않을 수 있으며, 동의하지 않으면 온라인 상담 신청이 제한됩니다. 이 경우 전화(051-916-7000) 또는 이메일(wants24@naver.com)로 문의하실 수 있습니다. <a href="privacy.html">개인정보처리방침 보기</a></p>
+            </div>
             <div class="ct-form-foot">
-              <label class="agree"><input type="checkbox" required> 개인정보 수집 및 이용에 동의합니다. (필수)</label>
+              <label class="agree"><input type="checkbox" name="privacy_agree" value="동의함" required aria-describedby="ctPrivacy"> 개인정보 수집 및 이용에 동의합니다. (필수)</label>
               <button type="submit" class="btn-submit">진단신청</button>
             </div>
+            <!-- 전송 상태 안내 : 전송 중 · 완료 · 실패 (js/main.js) -->
+            <div class="ct-form-status" role="status" aria-live="polite" hidden></div>
           </form>
         </div>
       </div>
@@ -185,8 +205,8 @@
             <a href="#" target="_blank" rel="noopener" aria-label="카카오톡 채널">K</a>
           </div>
           <div class="ft-policy">
-            <a href="#">이용약관</a>
-            <a href="#" class="bold">개인정보처리방침</a>
+            <!-- [이용약관 숨김] 페이지 준비 후 주석 해제 : <a href="terms.html">이용약관</a> -->
+            <a href="privacy.html" class="bold">개인정보처리방침</a>
           </div>
         </div>
       </div>
