@@ -528,6 +528,8 @@ input, textarea, select { font: inherit; }
 }
 .insta-grid a:hover::before, .insta-grid a:focus-visible::before, .insta-grid a:hover::after, .insta-grid a:focus-visible::after { opacity: 1; }
 .insta-grid a:hover::after, .insta-grid a:focus-visible::after { transform: none; }
+/* 썸네일 위에서는 커스텀 커서 숨김 (색 반전 효과 때문에 흰 인스타그램 아이콘이 검게 보이지 않도록 · .pf-hovering 과 같은 방식) */
+html:has(.insta-grid a:hover) .cursor.show { opacity: 0; }
 .blog-list { flex: 1; display: flex; flex-direction: column; gap: 22px; }
 .blog-list li { flex: 1; }
 .blog-list a {
