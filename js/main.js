@@ -169,6 +169,35 @@ document.addEventListener('DOMContentLoaded', function () {
       .catch(function () {});
   }
 
+  /* ---------- Main : WANTS CONTENT 인스타그램 최신 게시물 ---------- */
+  // data/instagram.json (GitHub Actions 가 하루 2번 Behold 피드로 갱신 · 썸네일은 img/instagram/) 으로 기존 6칸의 내용만 교체
+  // (스크롤 등장 연출이 기존 li 에 연결되어 있어 요소는 새로 만들지 않음) / 게시물이 모자라거나 불러오지 못한 칸은 HTML 기본값(로고 · 계정 링크) 유지
+  var instaLinks = document.querySelectorAll('.insta-grid a');
+  if (instaLinks.length && window.fetch) {
+    fetch('data/instagram.json', { cache: 'no-cache' })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (data) {
+        var items = data && Array.isArray(data.items) ? data.items : [];
+        items.slice(0, instaLinks.length).forEach(function (item, i) {
+          if (!item || !/^https:\/\/www\.instagram\.com\//.test(item.link || '') || !/^img\/instagram\/[\w-]+\.(jpg|webp|png)$/.test(item.thumb || '')) return;
+          var a = instaLinks[i];
+          var img = a.querySelector('img');
+          var defaultSrc = img.getAttribute('src');
+          img.addEventListener('error', function () { img.src = defaultSrc; }, { once: true }); // 썸네일이 없으면 기본 이미지
+          img.src = item.thumb;
+          img.alt = item.caption || 'WANTS 인스타그램 게시물';
+          a.href = item.link;
+          if (item.type === 'video' || item.type === 'carousel') {
+            var icon = document.createElement('i');
+            icon.className = 'insta-type is-' + item.type;
+            icon.setAttribute('aria-hidden', 'true');
+            a.appendChild(icon);
+          }
+        });
+      })
+      .catch(function () {});
+  }
+
   /* ---------- 공통 : SCROLL 안내 링크 (.ab-scroll.is-link · 메인 히어로) ---------- */
   // 스크롤을 시작하면 사라지고(맨 위로 돌아오면 다시 표시), 누르면 href 의 섹션으로 부드럽게 이동
   // (about · services 의 SCROLL 안내는 각 페이지 스크롤 연출(js/about.js · js/services.js)에서 사라짐 처리)

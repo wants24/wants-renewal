@@ -1,0 +1,42 @@
+# 메인 WANTS CONTENT 인스타그램 영역 : Behold 피드 → data/instagram.json + img/instagram/ 썸네일 (scripts/fetch-instagram.mjs)
+# Behold 무료 요금제(월 1,200회 조회) 보호 : 사이트는 피드를 직접 부르지 않고 이 워크플로만 조회 (하루 2번 ≈ 월 60회)
+name: 인스타그램 최신 게시물 업데이트
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # 매일 오전 9시 (한국 시간) = UTC 0시
+    - cron: '0 9 * * *' # 매일 오후 6시 (한국 시간) = UTC 9시 · GitHub 사정에 따라 수십 분 늦게 실행될 수 있음
+  workflow_dispatch: # Actions 탭의 'Run workflow' 버튼으로 수동 실행
+
+permissions:
+  contents: write # data/instagram.json · img/instagram/ 커밋 · 푸시
+
+concurrency:
+  group: update-instagram
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: 피드 받아서 data/instagram.json · 썸네일 갱신
+        run: node scripts/fetch-instagram.mjs
+
+      - name: 변경이 있을 때만 커밋
+        run: |
+          if [ -z "$(git status --porcelain -- data/instagram.json img/instagram)" ]; then
+            echo "변경 없음 - 커밋하지 않음"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A -- data/instagram.json img/instagram
+          git commit -m "인스타그램 최신 게시물 업데이트"
+          git pull --rebase origin main # 블로그 워크플로와 같은 시각에 실행돼도 푸시가 거절되지 않도록
+          git push

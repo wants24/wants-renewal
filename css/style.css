@@ -508,17 +508,26 @@ input, textarea, select { font: inherit; }
 .main-content { padding: 220px 0 180px; background: #fff; }
 .content-wrap { display: flex; gap: 20px; max-width: 1016px; margin: 110px auto 0; }
 .insta-box { flex: 0 0 632px; padding: 18px 12px 12px; border: 1.5px solid var(--c-line); border-radius: 16px; }
-.insta-box h3 { font-size: 16px; font-weight: 700; text-align: center; margin-bottom: 16px; }
+.insta-box h3 { font-size: 16px; font-weight: 700; text-align: center; margin-bottom: 2px; }
+.insta-account { display: block; width: fit-content; margin: 0 auto 12px; font-size: 12px; color: var(--c-gray); letter-spacing: .02em; transition: color .3s; }
+.insta-account:hover { color: var(--c-blue); }
 .insta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px 10px; }
-.insta-grid a {
-  display: block; aspect-ratio: 1 / 0.98;
-  background-color: var(--ph-2); /* TODO: background-image 교체 */
-  background-size: cover; background-position: center;
-  transition: opacity .3s;
+/* 썸네일 칸 : data/instagram.json 의 썸네일로 채움 (js/main.js) · 기본값은 로고 이미지 */
+.insta-grid a { position: relative; display: block; aspect-ratio: 1 / 0.98; overflow: hidden; background-color: var(--ph-2); }
+.insta-grid img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* 게시물 종류 아이콘 (오른쪽 위) : 릴스·영상 = 재생 / 여러 장 = 겹친 사각형 */
+.insta-type { position: absolute; top: 8px; right: 8px; z-index: 1; width: 18px; height: 18px; background: center / contain no-repeat; filter: drop-shadow(0 0 1px rgba(0, 0, 0, .5)) drop-shadow(0 1px 3px rgba(0, 0, 0, .5)); pointer-events: none; } /* 밝은 이미지 위에서도 보이게 */
+.insta-type.is-video { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 4.5v15l12.5-7.5z' fill='white'/%3E%3C/svg%3E"); }
+.insta-type.is-carousel { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='13' height='13' rx='2' fill='none' stroke='white' stroke-width='2'/%3E%3Crect x='8' y='8' width='13' height='13' rx='2' fill='white'/%3E%3C/svg%3E"); }
+/* 마우스를 올리면 살짝 어두워지며 가운데 인스타그램 아이콘 */
+.insta-grid a::before, .insta-grid a::after { content: ''; position: absolute; z-index: 2; opacity: 0; transition: opacity .3s var(--ease), transform .3s var(--ease); pointer-events: none; }
+.insta-grid a::before { inset: 0; background: rgba(0, 0, 0, .35); }
+.insta-grid a::after {
+  top: 50%; left: 50%; width: 32px; height: 32px; margin: -16px 0 0 -16px; transform: scale(.85);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Crect x='3' y='3' width='18' height='18' rx='5'/%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Ccircle cx='17.5' cy='6.5' r='.6' fill='white'/%3E%3C/svg%3E") center / contain no-repeat;
 }
-.insta-grid li:nth-child(2n) a { background-color: var(--ph-3); }
-.insta-grid li:nth-child(3n) a { background-color: var(--ph-4); }
-.insta-grid a:hover { opacity: .75; }
+.insta-grid a:hover::before, .insta-grid a:focus-visible::before, .insta-grid a:hover::after, .insta-grid a:focus-visible::after { opacity: 1; }
+.insta-grid a:hover::after, .insta-grid a:focus-visible::after { transform: none; }
 .blog-list { flex: 1; display: flex; flex-direction: column; gap: 22px; }
 .blog-list li { flex: 1; }
 .blog-list a {
