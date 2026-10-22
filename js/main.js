@@ -741,7 +741,7 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ---------- Sub : Contact Form (Web3Forms 전송) ---------- */
   // 접근 키 : web3forms.com 에서 회사 이메일(wants24@naver.com)로 발급받은 Access Key 를 따옴표 안에 넣음
   //           비어 있으면 전송하지 않고 전화 · 이메일 문의를 안내
-  var WEB3FORMS_KEY = '';
+  var WEB3FORMS_KEY = '13d85a6e-1585-47e4-b190-cc6eae31c31d';
   var form = document.querySelector('.contact-form');
   if (form) {
     var submitBtn = form.querySelector('[type="submit"]');
