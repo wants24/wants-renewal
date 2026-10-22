@@ -1693,12 +1693,6 @@ body::-webkit-scrollbar { display: none; width: 0; height: 0; } /* Chrome · Edg
 .policy-table th { width: 180px; background: #f8f9fa; font-weight: 700; color: #222; }
 .policy-table thead th { width: auto; }
 .policy-table thead + tbody td:first-child { white-space: nowrap; } /* 구분 칸(필수 · 선택 · 자동 수집) 한 줄 유지 */
-/* 확인 필요 표시 : 평소에는 일반 글자, privacy.html?review 로 열면 노란색 + 메모 */
-.pv-check { background: none; color: inherit; }
-.pv-review-note { display: none; }
-[data-pv-review] .pv-review-note { display: block; margin-top: 18px; padding: 12px 16px; border-radius: 8px; background: #fff8db; font-size: 14px; color: #8a5a00; }
-[data-pv-review] .pv-check { padding: 1px 3px; border-radius: 3px; background: #fff1a8; box-shadow: 0 0 0 1px #e8c34a inset; }
-[data-pv-review] .pv-check::after { content: ' [확인 필요 : ' attr(data-note) ']'; font-size: 12px; font-weight: 700; color: #b45309; }
 @media (max-width: 768px) {
   .policy-sec { padding: calc(var(--header-h) + 40px) 0 90px; }
   .policy-title { font-size: 30px; }

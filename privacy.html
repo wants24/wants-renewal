@@ -8,10 +8,8 @@
   <!-- 검색엔진 사이트 인증 (기존 wants24.com 과 같은 값 · 변경 금지) -->
   <meta name="naver-site-verification" content="0be1d38a32277d3f807ff47f5600100f4a78feac">
   <meta name="google-site-verification" content="5590au6AvHIaxLP_ar-Pui5Kfb1oLPZaWEDGRQpZLmk">
-  <!-- 초안 : 대표 확인 · 시행일 입력 전까지 검색 제외 (확정 후 이 줄 삭제) -->
+  <!-- 홈페이지 개시 전까지 검색 제외 · 개시일에 본문 제13조 시행일을 입력하면서 이 줄과 아래 noindex 삭제 + sitemap.xml 에 추가 -->
   <meta name="robots" content="noindex">
-  <!-- 확인 필요 부분 표시 : privacy.html?review 로 열면 노란색 표시 -->
-  <script>if (/[?&]review(&|=|$)/.test(location.search)) document.documentElement.setAttribute('data-pv-review', '');</script>
   <!-- 대표 주소 · 공유 미리보기 (https://www.wants24.com 기준) -->
   <link rel="canonical" href="https://www.wants24.com/privacy.html">
   <meta property="og:type" content="website">
@@ -67,17 +65,15 @@
   </header>
 
   <main>
-    <!-- ===== 개인정보처리방침 (초안)
-         - 확인 필요 부분 : <mark class="pv-check" data-note="..."> 로 표시
-         - 평소에는 일반 글자로 보이고, 주소 끝에 ?review 를 붙이면(privacy.html?review) 노란색 + 메모로 표시
-         - 대표 확인이 끝나면 mark 태그를 지우고, 시행일을 채우고, head 의 noindex 를 지울 것 ===== -->
+    <!-- ===== 개인정보처리방침 (대표 확인 완료)
+         - 개시일에 할 일 : 제13조 시행일 입력 · head 의 noindex 삭제 · sitemap.xml 에 privacy.html 추가
+         - Web3Forms 관련 내용 근거 : web3forms.com 의 privacy · terms · pricing · dpa (2026년 10월 확인) ===== -->
     <section class="policy-sec">
       <div class="inner">
         <div class="policy-head">
           <span class="sec-label">PRIVACY POLICY</span>
           <h2 class="policy-title">개인정보처리방침</h2>
           <p class="policy-lead">(주)원츠 브랜드마케팅(이하 '회사')은 「개인정보 보호법」 제30조에 따라 정보주체의 개인정보를 보호하고 이와 관련한 고충을 신속하고 원활하게 처리할 수 있도록 다음과 같이 개인정보처리방침을 수립·공개합니다.</p>
-          <p class="pv-review-note">검토 화면입니다. 노란색으로 표시된 부분은 대표님 확인이 필요한 내용입니다. (확인 필요 12곳)</p>
         </div>
 
         <nav class="policy-toc" aria-label="개인정보처리방침 목차">
@@ -103,7 +99,7 @@
             <h3>제1조 (개인정보의 처리 목적)</h3>
             <p>회사는 다음의 목적을 위하여 개인정보를 처리합니다. 처리한 개인정보는 다음의 목적 이외의 용도로는 이용하지 않으며, 이용 목적이 변경되는 경우에는 「개인정보 보호법」 제18조에 따라 별도의 동의를 받는 등 필요한 조치를 이행합니다.</p>
             <ul>
-              <li>홈페이지 상담 신청 : 상담 신청 확인, 상담 진행, 문의에 대한 회신 및 결과 안내, <mark class="pv-check" data-note="IP 주소 수집 목적 표현 확인 (Web3Forms 가 스팸 방지 등을 위해 자동 수집해 신청 메일에 함께 보냄)">부정 신청(스팸) 방지</mark></li>
+              <li>홈페이지 상담 신청 : 상담 신청 확인, 상담 진행, 문의에 대한 회신 및 결과 안내, 부정 신청(스팸) 방지</li>
             </ul>
           </section>
 
@@ -126,7 +122,7 @@
             <h3>제3조 (개인정보의 처리 및 보유 기간)</h3>
             <p>회사는 법령에 따른 개인정보 보유·이용 기간 또는 정보주체로부터 개인정보를 수집할 때 동의받은 보유·이용 기간 내에서 개인정보를 처리·보유합니다.</p>
             <ul>
-              <li>홈페이지 상담 신청 : <mark class="pv-check" data-note="보유 기간 1년이 적절한지 (예 : 6개월 · 3년 등)">상담 완료 후 1년</mark>간 보관 후 파기</li>
+              <li>홈페이지 상담 신청 : 상담 완료 후 1년간 보관 후 파기</li>
               <li>다만, 관계 법령에 따라 보존할 필요가 있는 경우에는 해당 법령에서 정한 기간 동안 보관합니다.</li>
             </ul>
           </section>
@@ -144,11 +140,12 @@
                 <thead><tr><th scope="col">수탁자</th><th scope="col">위탁 업무</th></tr></thead>
                 <tbody>
                   <tr><td>Web3Creative (Web3Forms 서비스)</td><td>홈페이지 상담 신청 내용의 접수·전달(이메일 발송) 및 보관</td></tr>
-                  <tr><td><mark class="pv-check" data-note="상담 신청 메일을 받는 네이버 메일을 수탁자로 적을지 (일반적으로는 생략하는 경우가 많음)">네이버(주) (네이버 메일)</mark></td><td><mark class="pv-check" data-note="위 항목과 함께 확인">상담 신청 메일의 수신 및 보관</mark></td></tr>
+                  <tr><td>네이버(주) (네이버 메일)</td><td>상담 신청 메일의 수신 및 보관</td></tr>
                 </tbody>
               </table>
             </div>
             <p>회사는 위탁 계약 시 「개인정보 보호법」 제26조에 따라 위탁업무 수행 목적 외 개인정보 처리 금지, 기술적·관리적 보호조치, 재위탁 제한, 수탁자에 대한 관리·감독, 손해배상 등 책임에 관한 사항을 확인하고, 수탁자가 개인정보를 안전하게 처리하는지를 감독합니다. 위탁 업무의 내용이나 수탁자가 변경될 경우에는 지체 없이 이 개인정보처리방침을 통하여 공개합니다.</p>
+            <p>Web3Forms 는 서비스 제공을 위하여 Amazon Web Services(서버 · 저장소 · 메일 발송), Cloudflare(전송 보안), Hetzner(서버), CleanTalk · Akismet(스팸 차단, 접속 IP 주소 · 이메일 확인)에 처리를 재위탁하며, 그 목록은 Web3Forms 데이터 처리 계약서(https://web3forms.com/dpa)에 공개되어 있습니다.</p>
           </section>
 
           <section id="pv6">
@@ -158,12 +155,12 @@
               <table>
                 <tbody>
                   <tr><th scope="row">이전받는 자</th><td>Web3Creative (Web3Forms 서비스 운영사)</td></tr>
-                  <tr><th scope="row">연락처</th><td><mark class="pv-check" data-note="Web3Forms 공식 문의 이메일 확인 필요 (공식 사이트에 공개된 이메일을 찾지 못함 · 계정 발급 후 대시보드나 안내 메일에서 확인)">web3forms.com 고객 문의 창구</mark></td></tr>
-                  <tr><th scope="row">이전되는 국가</th><td>인도(운영사 소재지), <mark class="pv-check" data-note="Web3Forms 는 AWS 서버를 쓴다고만 밝히고 있어 서버 국가(리전)를 정확히 알 수 없음 · 미국 등으로 확인되면 수정">미국 등 AWS(Amazon Web Services) 서버 소재 국가</mark></td></tr>
+                  <tr><th scope="row">연락처</th><td>support@web3forms.com (문의 양식 : https://web3forms.com/contact)</td></tr>
+                  <tr><th scope="row">이전되는 국가</th><td>인도(운영사 소재지) 및 Web3Forms 재위탁 업체의 처리 국가 : 미국(스팸 차단 서비스 CleanTalk · Akismet), 독일 · 핀란드(Hetzner), Amazon Web Services 서버 지역(Web3Forms 가 설정한 지역), Cloudflare 글로벌 네트워크</td></tr>
                   <tr><th scope="row">이전 일시 및 방법</th><td>정보주체가 상담 신청서를 제출하는 즉시, 정보통신망(HTTPS 암호화 전송)을 통하여 이전</td></tr>
                   <tr><th scope="row">이전되는 항목</th><td>회사명 또는 성함, 연락처, 이메일(선택), 업종(선택), 관심 서비스(선택), 문의 내용(선택), 개인정보 수집·이용 동의 여부, 접속 IP 주소(자동 수집)</td></tr>
                   <tr><th scope="row">이전 목적</th><td>상담 신청 내용의 접수, 회사 이메일로의 전달 및 보관</td></tr>
-                  <tr><th scope="row">보유 및 이용 기간</th><td>Web3Forms 의 데이터 보관 정책에 따라 <mark class="pv-check" data-note="Web3Forms 약관상 최대 3년 후 자동 삭제 · 회사가 대시보드에서 더 일찍 삭제할지 운영 방침 확인">제출일로부터 최대 3년간 보관 후 자동 삭제</mark>되며, 회사는 위탁 목적이 달성된 신청 내용을 지체 없이 삭제하도록 관리합니다.</td></tr>
+                  <tr><th scope="row">보유 및 이용 기간</th><td>Web3Forms 의 데이터 보관 정책(무료 요금제 기준)에 따라 제출일로부터 최대 3년간 보관 후 자동 삭제되며, 관리 화면에는 최근 30일분만 표시됩니다. 회사는 위탁 목적이 달성된 신청 내용을 지체 없이 삭제하도록 관리합니다.</td></tr>
                   <tr><th scope="row">거부 방법 및 거부 시 불이익</th><td>정보주체는 국외 이전을 거부할 수 있으며, 이 경우 상담 신청 폼을 이용하지 않고 전화(051-916-7000) 또는 이메일(wants24@naver.com)로 상담을 신청할 수 있습니다. 거부에 따른 상담상의 불이익은 없습니다.</td></tr>
                 </tbody>
               </table>
@@ -195,15 +192,15 @@
             <h3>제9조 (개인정보의 안전성 확보 조치)</h3>
             <p>회사는 개인정보의 안전성 확보를 위해 다음과 같은 조치를 하고 있습니다.</p>
             <ul>
-              <li>관리적 조치 : <mark class="pv-check" data-note="실제로 시행 중인 관리적 조치인지 확인 (내부관리계획 수립, 정기 교육 등)">개인정보를 처리하는 직원의 최소화 및 교육</mark></li>
+              <li>관리적 조치 : 개인정보를 처리하는 직원의 최소화 및 교육</li>
               <li>기술적 조치 : 상담 신청 내용의 암호화 전송(HTTPS), 개인정보를 처리하는 계정의 접근 권한 관리 및 비밀번호 관리</li>
-              <li>물리적 조치 : <mark class="pv-check" data-note="사무실 PC · 출력물 보관 방식 등 실제 운영 내용 확인">개인정보가 저장된 PC 및 출력물의 잠금 보관 등 접근 통제</mark></li>
+              <li>물리적 조치 : 개인정보가 저장된 PC 및 출력물의 잠금 보관 등 접근 통제</li>
             </ul>
           </section>
 
           <section id="pv10">
             <h3>제10조 (개인정보 자동 수집 장치의 설치·운영 및 거부)</h3>
-            <p>회사는 이용자에게 개별적인 맞춤 서비스를 제공하기 위해 이용 정보를 저장하고 수시로 불러오는 '쿠키(cookie)'를 <mark class="pv-check" data-note="현재 홈페이지에는 쿠키·방문 분석 도구(구글 애널리틱스, 네이버 애널리틱스 등)가 없음 · 나중에 분석 도구를 붙이면 이 조항을 수정해야 함">사용하지 않습니다</mark>.</p>
+            <p>회사는 이용자에게 개별적인 맞춤 서비스를 제공하기 위해 이용 정보를 저장하고 수시로 불러오는 '쿠키(cookie)'를 사용하지 않습니다.</p>
             <p>다만 홈페이지 제공 과정에서 호스팅 서비스(GitHub Pages) 및 웹 글꼴 서비스(Google Fonts)의 서버에 접속 IP 주소, 브라우저 정보 등 접속 기록이 해당 서비스의 정책에 따라 자동으로 기록될 수 있습니다.</p>
           </section>
 
@@ -214,7 +211,7 @@
               <table>
                 <tbody>
                   <tr><th scope="row">개인정보 보호책임자</th><td>최의영 (대표)</td></tr>
-                  <tr><th scope="row">열람청구 접수·처리 부서</th><td><mark class="pv-check" data-note="담당 부서나 담당자를 따로 둘지 확인 (없으면 대표 직접 처리로 유지)">개인정보 보호책임자가 직접 접수·처리</mark></td></tr>
+                  <tr><th scope="row">열람청구 접수·처리 부서</th><td>개인정보 보호책임자가 직접 접수·처리</td></tr>
                   <tr><th scope="row">전화</th><td>051-916-7000</td></tr>
                   <tr><th scope="row">이메일</th><td>wants24@naver.com</td></tr>
                   <tr><th scope="row">주소</th><td>부산광역시 남구 용소로 19번길 19, 동우빌딩 2층</td></tr>
@@ -236,7 +233,7 @@
 
           <section id="pv13">
             <h3>제13조 (개인정보처리방침의 변경)</h3>
-            <p>이 개인정보처리방침은 <mark class="pv-check pv-date" data-note="시행일 입력 (홈페이지 개시일 또는 대표 확인일)">20&nbsp;&nbsp;&nbsp;&nbsp;년&nbsp;&nbsp;&nbsp;&nbsp;월&nbsp;&nbsp;&nbsp;&nbsp;일</mark>부터 적용됩니다. 내용의 추가, 삭제 및 수정이 있을 경우에는 시행 7일 전부터 홈페이지를 통하여 공지합니다.</p>
+            <p>이 개인정보처리방침은 <!-- 시행일 : 홈페이지 개시일 입력 (예 : 2026년 11월 2일) -->20○○년 ○○월 ○○일부터 적용됩니다. 내용의 추가, 삭제 및 수정이 있을 경우에는 시행 7일 전부터 홈페이지를 통하여 공지합니다.</p>
           </section>
         </div>
       </div>
