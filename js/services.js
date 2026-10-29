@@ -3,7 +3,8 @@
    - 서비스 탭 : 섹션 2·3 은 공통 틀 1개 → 탭을 누르면 SERVICE_DATA 의 문구만 페이드로 교체
    - 메인 페이지 서비스 카드(services.html#svc01 ~ #svc07)로 들어오면 해당 탭을 열고 탭 위치로 이동
    - 섹션 1 : 화면을 고정하고 스크롤에 따라 문구가 차례로 등장
-   - 섹션 3 : 선택한 탭의 산출물 표시 + 카드가 스크롤에 따라 가로 이동 (점선 스크롤 바 연동)
+   - 섹션 2 : 타이틀이 탭 아래에 닿으면 화면 고정 → 플러스 기호 · 카드 순차 등장
+   - 섹션 3 : 선택한 탭의 산출물 표시 (화면 고정 · 박스 순차 등장)
    - 섹션 4 : 화면 고정 · 배경 → 그래픽 → 타이틀 → 좌측으로 이동하며 STEP 순차 등장
    ========================================================= */
 
@@ -205,6 +206,20 @@ var SERVICE_DATA = {
       if (value != null) el.innerHTML = value; // 타이틀의 <br>·강조 span 포함
     });
   }
+  // 스크롤 연출 위치 재계산 : body 로 옮겨 고정(pinReparent) 중에 다시 계산하면 고정 위치가 어긋나므로, 고정이 풀린 뒤로 미룸
+  var refreshLater = false;
+  var reparentPinned = function () {
+    return window.ScrollTrigger.getAll().some(function (st) { return st.isActive && st.vars.pinReparent; });
+  };
+  function refreshScroll() {
+    if (!window.ScrollTrigger) return;
+    if (reparentPinned()) refreshLater = true;
+    else window.ScrollTrigger.refresh();
+  }
+  if (window.gsap && window.ScrollTrigger) gsap.ticker.add(function () {
+    if (refreshLater && !reparentPinned()) { refreshLater = false; window.ScrollTrigger.refresh(); }
+  });
+
   // 문구 교체 : 페이드아웃 → 교체 → 페이드인 (animate:false 면 바로 교체)
   var SWITCH_MS = 280; // css .is-switching 전환 시간과 같게
   var switchTimer = null;
@@ -214,7 +229,7 @@ var SERVICE_DATA = {
     var apply = function () {
       fill(SERVICE_DATA[id]);
       boxes.forEach(function (box) { box.classList.remove('is-switching'); });
-      if (window.ScrollTrigger) window.ScrollTrigger.refresh(); // 문구 길이에 따라 높이가 바뀌므로 스크롤 연출 위치 재계산
+      refreshScroll(); // 문구 길이에 따라 높이가 바뀌므로 스크롤 연출 위치 재계산
     };
     if (!animate) { apply(); return; }
     boxes.forEach(function (box) { box.classList.add('is-switching'); });
@@ -238,7 +253,9 @@ var SERVICE_DATA = {
   tabs.forEach(function (tab) {
     tab.addEventListener('click', function () {
       // 패널 내용을 내려 읽던 중이면(패널 시작이 고정 탭 아래로 가려짐) 새 패널의 시작 위치로 이동
-      var readDown = pane.getBoundingClientRect().top < tabWrap.getBoundingClientRect().bottom;
+      // (패널이 화면에 고정되어 순차 등장 중일 때는 이동하지 않고 문구만 교체)
+      var panePin = window.ScrollTrigger && window.ScrollTrigger.getById('svcPanePin');
+      var readDown = !(panePin && panePin.isActive) && pane.getBoundingClientRect().top < tabWrap.getBoundingClientRect().bottom;
       select(tab.getAttribute('data-svc'), { scroll: readDown });
       tab.scrollIntoView({ block: 'nearest', inline: 'center' }); // 모바일 : 가로 스크롤 탭에서 선택한 탭이 보이도록
     });
@@ -259,29 +276,30 @@ var SERVICE_DATA = {
   var TUNE = window.SCROLL_TUNE || { len: 1, scrub: 0 }; // 스크롤 호흡 설정 (js/scroll.js 0번)
   var pace = function () { return (window.innerWidth <= 768 ? 0.8 : 1) * TUNE.len; };
 
-  // 페이지 스크롤 이동 (Lenis 사용 시 Lenis 로)
-  var scrollPage = function (y, immediate) {
-    if (window.lenis) window.lenis.scrollTo(y, { immediate: !!immediate });
-    else window.scrollTo(0, y);
-  };
-
   /* 섹션 2 → 3, 섹션 3 → 4 : 메인 페이지 섹션 1 → 2 와 같은 전환 (js/scroll.js stackOver 와 같은 방식)
      섹션을 고정한 채 머문 뒤, 다음 섹션이 위로 덮어 올라오는 동안 0 → 0.9 어두워지며 내용이 흐려짐 */
   var HOLD_PC = 0.8, HOLD_MOBILE = 0.5; // 머무름 거리 (화면 높이 대비 · 메인과 동일)
   var getHold = function () { return Math.round(window.innerHeight * (window.innerWidth <= 768 ? HOLD_MOBILE : HOLD_PC) * TUNE.len); };
   var stacks = [];
-  var stackOver = function (section, priority) {
+  // opts.hold : 머무름 거리 배율 (0 = 머무르지 않고 바로 덮음) · opts.start : 고정 시작 위치를 직접 계산하는 함수 (스크롤 값)
+  var stackOver = function (section, priority, opts) {
     if (!section) return;
+    opts = opts || {};
+    var sectionHold = function () { return Math.round(getHold() * (opts.hold == null ? 1 : opts.hold)); };
     var next = section.nextElementSibling;
     // 화면보다 긴 섹션은 하단이 화면 하단에 닿을 때 고정 (내용이 잘리지 않도록)
-    var anchor = function () { return section.offsetHeight > window.innerHeight ? 'bottom bottom' : 'top top'; };
+    var anchor = function () {
+      var start = opts.start && opts.start();
+      if (start != null) return start;
+      return section.offsetHeight > window.innerHeight ? 'bottom bottom' : 'top top';
+    };
     var cover = function () { return Math.min(section.offsetHeight, window.innerHeight); };
-    if (next) { next.style.marginTop = getHold() + 'px'; stacks.push(next); } // 다음 섹션을 머무름 거리만큼 아래로 (투명 여백)
-    var hold = getHold(), coverDist = cover();
+    if (next) { next.style.marginTop = sectionHold() + 'px'; stacks.push({ next: next, hold: sectionHold }); } // 다음 섹션을 머무름 거리만큼 아래로 (투명 여백)
+    var hold = sectionHold(), coverDist = cover();
     gsap.timeline({
       scrollTrigger: {
         trigger: section, start: anchor,
-        end: function () { return '+=' + (getHold() + cover()); },
+        end: function () { return '+=' + (sectionHold() + cover()); },
         pin: true, pinSpacing: false, scrub: TUNE.scrub || 1, invalidateOnRefresh: true, refreshPriority: priority
       }
     })
@@ -290,36 +308,74 @@ var SERVICE_DATA = {
       .to(section.children, { autoAlpha: 0, ease: 'none', duration: coverDist * 0.6 }, hold);
   };
   ScrollTrigger.addEventListener('refreshInit', function () {
-    stacks.forEach(function (next) { next.style.marginTop = getHold() + 'px'; });
+    stacks.forEach(function (st) { st.next.style.marginTop = st.hold() + 'px'; });
   });
-  stackOver(document.querySelector('.svc-tabs-sec'), 4);
-  stackOver(document.querySelector('.svc-output'), 2);
+  var paneEnd = null; // 섹션 2 내용 고정이 끝나는 위치 (아래 섹션 2 에서 정함)
+  stackOver(document.querySelector('.svc-tabs-sec'), 4, {
+    // 섹션 2 는 내용 고정 끝에 이미 머무는 구간이 있어, 고정이 풀리는 그 자리에서 바로 섹션 3 이 화면 아래부터 덮음
+    // (섹션 2 하단 여백 = 고정 중 카드 아래 여백 · css .svc-anim .svc-tabs-sec → 내용이 다시 움직였다 멈추는 덜컥임 없이 이어짐)
+    hold: 0,
+    start: function () { return paneEnd && paneEnd(); }
+  });
+  stackOver(document.querySelector('.svc-output'), 2, { hold: 0 }); // 섹션 3 은 산출물 연출 끝에 이미 머무는 구간이 있어 머무름 없이 바로 섹션 4 가 덮음
 
-  /* 섹션 2 : 선택된 서비스 내용 순차 등장 (영역에 들어오면 한 번 재생)
-     ① 라벨·타이틀 → ② 안내 박스 (0.32초 간격) → ③ 플러스 기호 → ④ 카드 3개를 0.3초 간격으로 왼쪽부터
-     위쪽(타이틀·안내 박스)과 아래쪽(플러스·카드)은 각각 화면에 들어올 때 재생 (긴 영역이 화면 밖에서 미리 끝나지 않도록)
+  /* 섹션 2 : 선택된 서비스 내용 순차 등장
+     ① 라벨·타이틀 → ② 안내 박스 : 영역에 들어오면 한 번 재생 (0.32초 간격)
+     → 타이틀이 탭 버튼 줄 아래에 닿으면 화면 고정(pin) + 스크롤 연동(scrub)
+     → 타이틀·안내 박스는 멈춘 채 ③ 플러스 기호 → ④ 카드 3개가 왼쪽(모바일은 위)부터 하나씩 등장 → 잠시 머문 뒤 고정 해제
+     화면이 낮아 카드까지 한 화면에 다 들어오지 않으면, 카드가 나오는 동안만 내용 전체를 모자란 만큼 위로 올림
      (공통 틀이라 탭을 바꿔도 같은 요소 · 문구만 바뀜) */
   var activePane = document.getElementById('svcPane');
   if (activePane) {
+    var paneHead = activePane.querySelector('.svc-headline');
     var paneTop = gsap.utils.toArray(activePane.querySelectorAll('.svc-headline .sec-label, .svc-headline h3, .svc-summary'));
     var panePlus = activePane.querySelector('.svc-plus');
+    var paneBlock = activePane.querySelector('.svc-block');
     var paneCards = gsap.utils.toArray(activePane.querySelectorAll('.svc-focus li'));
     gsap.set(paneTop.concat(paneCards), { y: 50, autoAlpha: 0 }); // 시작 상태
     if (panePlus) gsap.set(panePlus, { scale: 0.4, rotate: -90, autoAlpha: 0 });
     ScrollTrigger.create({
-      trigger: activePane.querySelector('.svc-headline'), start: 'top 85%', once: true, refreshPriority: 3.5,
+      trigger: paneHead, start: 'top 85%', once: true, refreshPriority: 3.5,
       onEnter: function () {
         gsap.to(paneTop, { y: 0, autoAlpha: 1, duration: 1.6, ease: 'power3.out', stagger: 0.32 });
       }
     });
-    ScrollTrigger.create({
-      trigger: panePlus || paneCards[0], start: 'top 88%', once: true, refreshPriority: 3.5,
-      onEnter: function () {
-        var tl = gsap.timeline();
-        if (panePlus) tl.to(panePlus, { scale: 1, rotate: 0, autoAlpha: 1, duration: 1.2, ease: 'back.out(1.4)' });
-        tl.to(paneCards, { y: 0, autoAlpha: 1, duration: 1.5, ease: 'power3.out', stagger: 0.3 }, panePlus ? '-=0.4' : 0);
-      }
+
+    var paneHeaderH = function () { return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 0; };
+    // 타이틀이 머무는 위치 : 탭 버튼 줄 아래 여백 24px (섹션 3 과 같은 기준)
+    var paneSafeTop = function () {
+      var tabsBar = document.querySelector('.svc-tabs');
+      return paneHeaderH() + (tabsBar ? tabsBar.offsetHeight : 0) + 24;
+    };
+    var paneContentH = function () { return paneBlock.offsetTop + paneBlock.offsetHeight - paneHead.offsetTop; }; // 타이틀 ~ 카드 끝
+    // 카드 아래 여백 : 섹션 2 하단 여백과 같은 값 (PC 100 · 태블릿 80 · 모바일 60px · css .svc-anim .svc-tabs-sec)
+    var paneGap = function () { return parseFloat(getComputedStyle(document.querySelector('.svc-tabs-sec')).paddingBottom) || 0; };
+    var paneOverflow = function () { return Math.max(0, paneSafeTop() + paneContentH() - (window.innerHeight - paneGap())); }; // 한 화면에 모자란 높이
+    // 고정 시 영역(.inner) 상단 위치 : 다 나타난 상태에서 카드 하단이 화면 하단 여백(paneGap) 위에 오도록 (paneHead.offsetTop : .inner 상단 ~ 타이틀)
+    var panePinTop = function () { return Math.round(paneSafeTop() - paneOverflow() - paneHead.offsetTop); };
+    var paneShift = [paneHead, panePlus, paneBlock].filter(Boolean);
+    // 고정 대상 : 패널을 감싼 .inner (패널 자체는 탭 전환용 CSS transition 이 있어 고정 위치 계산이 어긋남)
+    var paneBox = activePane.parentElement; // .svc-tabs-inner
+    var CARD_AT = 1, CARD_GAP = 0.5; // 카드 등장 시작 시점 · 카드 간 간격
+    var PANE_HOLD = 2.4; // 카드가 다 나온 뒤 머무는 길이 (늘리면 섹션 3 이 더 늦게 올라옴)
+    var PANE_UNIT = function () { return window.innerWidth <= 768 ? 0.35 : 0.41; }; // 연출 1단위당 스크롤 거리 (화면 높이 대비 · 등장 속도)
+
+    var paneTl = gsap.timeline();
+    paneTl.to({}, { duration: 0.4 }); // 타이틀·안내 박스만 보이는 상태로 잠시 정지
+    if (panePlus) paneTl.to(panePlus, { scale: 1, rotate: 0, autoAlpha: 1, duration: 0.8, ease: 'back.out(1.4)' }, 0.4);
+    paneTl.to(paneCards, { y: 0, autoAlpha: 1, duration: 0.8, ease: 'power2.out', stagger: CARD_GAP }, CARD_AT);
+    // 고정 전에는 모자란 만큼 내려 둔 상태(타이틀이 탭 버튼 줄 아래) → 카드가 나오는 동안 제자리로
+    paneTl.fromTo(paneShift, { y: paneOverflow }, { y: 0, ease: 'power1.inOut', duration: (paneCards.length - 1) * CARD_GAP + 0.8 }, CARD_AT);
+    paneTl.to({}, { duration: PANE_HOLD }); // 모두 나타난 상태로 충분히 머문 뒤 고정 해제 (바로 섹션 3 이 덮기 시작)
+
+    var paneST = ScrollTrigger.create({
+      id: 'svcPanePin', trigger: paneBox,
+      start: function () { return 'top ' + panePinTop() + 'px'; },
+      end: function () { return '+=' + Math.round(paneTl.duration() * window.innerHeight * PANE_UNIT() * TUNE.len); }, // 스크롤 거리 (연출 길이 × 단위 거리)
+      pin: true, scrub: TUNE.scrub || 1, animation: paneTl, invalidateOnRefresh: true, refreshPriority: 4.5, // 섹션 2 덮기 전환(4)보다 먼저 계산
+      pinReparent: true // 섹션 2 자체도 덮기 전환으로 고정(transform 적용)되어, 고정 중에는 body 로 옮겨야 화면에 고정됨 (섹션 3 과 같은 방식)
     });
+    paneEnd = function () { return Math.round(paneST.end); };
   }
 
   /* 섹션 3 : 산출물 박스 · 화면 고정(pin) + 스크롤 연동(scrub) 순차 등장
@@ -370,53 +426,6 @@ var SERVICE_DATA = {
       },
       onLeaveBack: function () { setActiveDeliver(-1); }
     });
-  }
-
-  /* 섹션 3 : 카드가 섹션을 지나가는 동안(고정되어 머무는 구간 포함) 왼쪽으로 이동 + 스크롤 바 막대 위치 연동 */
-  var gallery = document.querySelector('.svc-gallery');
-  if (gallery) {
-    var track = gallery.querySelector('.svc-gallery-track');
-    var bar = gallery.querySelector('.svc-gallery-bar');
-    var thumb = bar && bar.querySelector('.pf-bar-thumb');
-    var distance = function () { return Math.max(0, track.scrollWidth - window.innerWidth); };
-    var updateBar = function (p) {
-      if (thumb) thumb.style.transform = 'translateX(' + (p * (bar.offsetWidth - thumb.offsetWidth)) + 'px)';
-    };
-    var galleryST = ScrollTrigger.create({
-      trigger: gallery, start: 'top bottom',
-      end: function () { return 'bottom bottom-=' + getHold(); }, // 섹션 3 이 고정되어 머무는 구간까지 이동
-      animation: gsap.fromTo(track, { x: 0 }, { x: function () { return -distance(); }, ease: 'none' }),
-      scrub: TUNE.scrub || 0.6, invalidateOnRefresh: true, refreshPriority: 3,
-      onUpdate: function (self) { updateBar(self.progress); },
-      onRefresh: function (self) { updateBar(self.progress); }
-    });
-
-    // 카드 등장 : 카드 영역이 화면에 들어오면 왼쪽부터 0.15초 간격으로 아래에서 떠오르며 페이드인
-    // (가로 이동은 트랙 x, 등장은 카드 y 로 나눠 서로 겹치지 않음 · 위로 되돌아가면 다시 숨김)
-    gsap.fromTo(track.children, { y: 60, autoAlpha: 0 }, {
-      y: 0, autoAlpha: 1, duration: 0.9, ease: 'power3.out', stagger: 0.15,
-      scrollTrigger: { trigger: track, start: 'top 85%', toggleActions: 'play none none reverse', refreshPriority: 3 }
-    });
-
-    // 막대 클릭·드래그 : 해당 진행률 위치로 페이지 스크롤
-    if (bar) {
-      var scrubTo = function (e, immediate) {
-        var r = bar.getBoundingClientRect();
-        var ratio = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
-        scrollPage(galleryST.start + ratio * (galleryST.end - galleryST.start), immediate);
-      };
-      var dragging = false;
-      bar.addEventListener('pointerdown', function (e) {
-        dragging = true;
-        bar.classList.add('is-dragging');
-        if (bar.setPointerCapture) bar.setPointerCapture(e.pointerId);
-        scrubTo(e);
-      });
-      bar.addEventListener('pointermove', function (e) { if (dragging) scrubTo(e, true); });
-      var stop = function () { dragging = false; bar.classList.remove('is-dragging'); };
-      bar.addEventListener('pointerup', stop);
-      bar.addEventListener('pointercancel', stop);
-    }
   }
 
   /* 섹션 4 : 진행 과정 (화면 고정)
