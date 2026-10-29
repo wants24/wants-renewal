@@ -497,7 +497,7 @@ input, textarea, select { font: inherit; }
 }
 
 /* ---------- Section 5 : Content ---------- */
-.main-content { padding: 220px 0 180px; background: #fff; }
+.main-content { position: relative; z-index: 2; padding: 220px 0 180px; background: #fff; } /* 위치·z-index 지정 : 고정이 풀린 섹션 3 이 섹션 4 보다 길 때(큰 화면) 아래로 비치지 않도록 (.main-portfolio 와 같은 방식) */
 .content-wrap { display: flex; gap: 20px; max-width: 1016px; margin: 110px auto 0; }
 .insta-box { flex: 0 0 632px; padding: 18px 12px 12px; border: 1.5px solid var(--c-line); border-radius: 16px; }
 .insta-box h3 { font-size: 16px; font-weight: 700; text-align: center; margin-bottom: 2px; }
