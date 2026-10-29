@@ -1,29 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 검색엔진용 페이지 목록 (https://www.wants24.com 기준)
-     portfolio.html 은 메뉴에서 숨긴 준비 중 페이지라 제외 · 기존 주소 이동용 페이지(/Wants 등)와 404.html 도 제외 -->
+     portfolio.html 은 메뉴에서 숨긴 준비 중 페이지라 제외 · privacy.html 은 검색 유입 대상이 아니라 제외
+     기존 주소 이동용 페이지(/Wants 등)와 404.html 도 제외 · 페이지 내용을 고치면 해당 lastmod 갱신 -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.wants24.com/</loc>
-    <lastmod>2026-10-22</lastmod>
+    <lastmod>2026-10-29</lastmod>
   </url>
   <url>
     <loc>https://www.wants24.com/about.html</loc>
-    <lastmod>2026-10-22</lastmod>
+    <lastmod>2026-10-29</lastmod>
   </url>
   <url>
     <loc>https://www.wants24.com/services.html</loc>
-    <lastmod>2026-10-22</lastmod>
+    <lastmod>2026-10-29</lastmod>
   </url>
   <url>
     <loc>https://www.wants24.com/faq.html</loc>
-    <lastmod>2026-10-22</lastmod>
+    <lastmod>2026-10-29</lastmod>
   </url>
   <url>
     <loc>https://www.wants24.com/contact.html</loc>
-    <lastmod>2026-10-22</lastmod>
-  </url>
-  <url>
-    <loc>https://www.wants24.com/privacy.html</loc>
-    <lastmod>2026-10-22</lastmod>
+    <lastmod>2026-10-29</lastmod>
   </url>
 </urlset>

@@ -802,6 +802,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(function (res) { return res.json().catch(function () { return {}; }); })
         .then(function (json) {
           if (!json || json.success !== true) throw new Error((json && json.message) || 'send failed');
+          if (window.wantsTrack) window.wantsTrack('generate_lead', { form_name: 'contact' }); // GA4 상담 신청 전환 (js/analytics.js · 입력 내용은 보내지 않음)
           form.reset();
           setStatus('success', '상담 신청이 접수되었습니다. 내용을 확인한 뒤 남겨주신 연락처로 연락드리겠습니다.');
         })

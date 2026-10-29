@@ -568,7 +568,7 @@ html:has(.insta-grid a:hover) .cursor.show { opacity: 0; }
   color: #fff; text-align: center;
 }
 .sub-visual .sec-label { color: var(--c-blue); }
-.sub-visual h2 { font-size: 52px; font-weight: 700; letter-spacing: -.02em; line-height: 1.3; }
+.sub-visual h1 { font-size: 52px; font-weight: 700; letter-spacing: -.02em; line-height: 1.3; }
 .sub-visual p { margin-top: 14px; font-size: 17px; color: rgba(255,255,255,.8); }
 .sub-sec { padding: 140px 0; }
 .sub-sec.gray { background: #f6f6f6; }
@@ -631,12 +631,12 @@ html:has(.insta-grid a:hover) .cursor.show { opacity: 0; }
   background-image: linear-gradient(rgba(255, 255, 255, .5), rgba(255, 255, 255, .5)), url('../img/services_hero_bg.jpg'); /* 이미지 위 흰색 레이어 : 글자 가독성 */
   color: #222;
 }
-.svc-visual h2 { font-size: 36px; font-weight: 600; line-height: 1.45; color: #222; }
-.svc-visual h2 > * { display: block; }
-.svc-visual h2 strong { font-size: calc(58px * var(--big, 1)); font-weight: 700; line-height: 1.3; color: var(--c-blue); } /* --big : 스크롤 연출 확대 배율 (js/services.js) */
+.svc-visual h1 { font-size: 36px; font-weight: 600; line-height: 1.45; color: #222; }
+.svc-visual h1 > * { display: block; }
+.svc-visual h1 strong { font-size: calc(58px * var(--big, 1)); font-weight: 700; line-height: 1.3; color: var(--c-blue); } /* --big : 스크롤 연출 확대 배율 (js/services.js) */
 /* 스크롤 연출 초기 상태 (html.svc-anim · js/services.js 가 순서대로 등장시킴) */
-.svc-anim .svc-visual h2 > *, .svc-anim .svc-visual p { opacity: 0; }
-.svc-anim .svc-visual h2 strong { color: #222; } /* 축소된 뒤 포인트 색상으로 바뀜 */
+.svc-anim .svc-visual h1 > *, .svc-anim .svc-visual p { opacity: 0; }
+.svc-anim .svc-visual h1 strong { color: #222; } /* 축소된 뒤 포인트 색상으로 바뀜 */
 .svc-anim .svc-visual .ab-scroll { display: block; }
 .svc-visual p { margin-top: 30px; font-size: 16px; line-height: 1.8; color: #444; }
 /* 섹션 2 : 서비스 탭 + 선택한 서비스 소개 (가운데 정렬) */
@@ -815,8 +815,8 @@ html:has(.insta-grid a:hover) .cursor.show { opacity: 0; }
   .svc-proc-graphic { width: 380px; }
 }
 @media (max-width: 1024px) {
-  .svc-visual h2 { font-size: 30px; }
-  .svc-visual h2 strong { font-size: calc(48px * var(--big, 1)); }
+  .svc-visual h1 { font-size: 30px; }
+  .svc-visual h1 strong { font-size: calc(48px * var(--big, 1)); }
   .svc-tabs-sec { padding: 80px 0 100px; }
   .svc-tabs { justify-content: flex-start; overflow-x: auto; scrollbar-width: none; margin: 0 -40px; padding-left: 40px; padding-right: 40px; }
   .svc-tabs.is-float { margin: 0; }
@@ -844,8 +844,8 @@ html:has(.insta-grid a:hover) .cursor.show { opacity: 0; }
 }
 @media (max-width: 768px) {
   .sub-visual.svc-visual { min-height: 560px; }
-  .svc-visual h2 { font-size: 20px; }
-  .svc-visual h2 strong { font-size: calc(30px * var(--big, 1)); }
+  .svc-visual h1 { font-size: 20px; }
+  .svc-visual h1 strong { font-size: calc(30px * var(--big, 1)); }
   .svc-visual p { margin-top: 20px; font-size: 14px; }
   .svc-tabs-sec { padding: 40px 0 90px; }
   .svc-tabs { margin: 0 -20px; padding-left: 20px; padding-right: 20px; }
@@ -1168,7 +1168,7 @@ html:has(.insta-grid a:hover) .cursor.show { opacity: 0; }
 /* 섹션 2 : 안내 + 연락처 */
 .ct-info { padding: 30px 0; } /* 진단신청 → 정보 박스 30px · 정보 박스 → 푸터 30px */
 .ct-info .inner { max-width: 1240px; }
-.ct-meta { display: grid; grid-template-columns: 1fr 1.6fr 1.6fr; gap: 20px; padding: 30px 0; border-top: 1px solid rgba(0, 0, 0, .1); border-bottom: 1px solid rgba(0, 0, 0, .1); }
+.ct-meta { display: grid; grid-template-columns: .7fr 1fr 1.5fr 1.8fr; gap: 20px; padding: 30px 0; border-top: 1px solid rgba(0, 0, 0, .1); border-bottom: 1px solid rgba(0, 0, 0, .1); }
 .ct-meta dt { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: .15em; color: var(--c-blue); }
 .ct-meta dd { margin-top: 8px; font-size: 14px; line-height: 1.6; color: rgba(0, 0, 0, .75); }
 .ct-meta a:hover { color: var(--c-blue); }
@@ -1212,14 +1212,7 @@ html:has(.insta-grid a:hover) .cursor.show { opacity: 0; }
 .ft-right { text-align: right; flex-shrink: 0; }
 .ft-cs strong { display: block; color: #fff; font-size: 30px; font-weight: 700; line-height: 1.2; }
 .ft-cs span { font-size: 13px; }
-.ft-sns { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
-.ft-sns a {
-  display: flex; align-items: center; justify-content: center;
-  width: 42px; height: 42px; border: 1px solid rgba(255,255,255,.25); border-radius: 50%;
-  font-size: 11px; font-weight: 700; color: #fff; transition: background .3s, border-color .3s;
-}
-.ft-sns a:hover { background: var(--c-blue); border-color: var(--c-blue); }
-.ft-policy { display: flex; gap: 20px; margin-top: 14px; justify-content: flex-end; }
+.ft-policy { display: flex; gap: 20px; margin-top: 22px; justify-content: flex-end; } /* 대표번호·운영시간 아래 간격 */
 .ft-policy a { font-size: 13px; transition: color .3s; }
 .ft-policy a:hover, .ft-policy a.bold { color: #fff; }
 
@@ -1257,7 +1250,7 @@ html:has(.insta-grid a:hover) .cursor.show { opacity: 0; }
   .process-list { grid-template-columns: repeat(3, 1fr); }
   .ft-top, .ft-mid { flex-direction: column; align-items: flex-start; }
   .ft-right { text-align: left; }
-  .ft-sns, .ft-policy { justify-content: flex-start; }
+  .ft-policy { justify-content: flex-start; }
 }
 @media (max-width: 1024px) {
   :root { --header-h: 76px; }
@@ -1313,7 +1306,7 @@ html:has(.insta-grid a:hover) .cursor.show { opacity: 0; }
   .main-cta h2 { font-size: 24px; }
   .main-cta p br { display: none; }
   .sub-visual { height: 340px; }
-  .sub-visual h2 { font-size: 32px; }
+  .sub-visual h1 { font-size: 32px; }
   .sub-sec { padding: 90px 0; }
   .card-grid, .card-grid.col4, .pf-grid { grid-template-columns: 1fr; }
   .stat-list { grid-template-columns: repeat(2, 1fr); }

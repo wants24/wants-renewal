@@ -27,10 +27,38 @@
   <meta name="twitter:image" content="https://www.wants24.com/img/og-image.jpg">
   <link rel="icon" type="image/png" sizes="32x32" href="img/favicon.png">
   <link rel="apple-touch-icon" href="img/favicon.png">
+  <meta name="theme-color" content="#00a8ec">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <!-- Google Analytics 4 : 측정 ID 는 js/analytics.js 의 GA_ID 한 곳에서 관리 -->
+  <script src="js/analytics.js" async></script>
+  <!-- 구조화 데이터 (JSON-LD) : 화면에 보이는 정보와 같게 유지 -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "홈",
+            "item": "https://www.wants24.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "개인정보처리방침",
+            "item": "https://www.wants24.com/privacy.html"
+          }
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 <body class="sub">
 
@@ -71,7 +99,7 @@
       <div class="inner">
         <div class="policy-head">
           <span class="sec-label">PRIVACY POLICY</span>
-          <h2 class="policy-title">개인정보처리방침</h2>
+          <h1 class="policy-title">개인정보처리방침</h1>
           <p class="policy-lead">(주)원츠 브랜드마케팅(이하 '회사')은 「개인정보 보호법」 제30조에 따라 정보주체의 개인정보를 보호하고 이와 관련한 고충을 신속하고 원활하게 처리할 수 있도록 다음과 같이 개인정보처리방침을 수립·공개합니다.</p>
         </div>
 
@@ -268,18 +296,12 @@
             <span><b>대표번호</b>051-916-7000</span>
             <span><b>E-mail</b>wants24@naver.com</span>
           </p>
-          <p class="ft-copy">© 2022 WANTS BRAND MARKETING. All Rights Reserved.</p>
+          <p class="ft-copy">© 2026 WANTS BRAND MARKETING. All Rights Reserved.</p>
         </div>
         <div class="ft-right">
           <div class="ft-cs">
-            <strong>051-916-7000</strong>
+            <strong><a href="tel:051-916-7000">051-916-7000</a></strong>
             <span>평일 09:00 - 18:00 (점심 12:00 - 13:00) · 주말/공휴일 휴무</span>
-          </div>
-          <div class="ft-sns">
-            <a href="#" target="_blank" rel="noopener" aria-label="인스타그램">IG</a>
-            <a href="#" target="_blank" rel="noopener" aria-label="네이버 블로그">B</a>
-            <a href="#" target="_blank" rel="noopener" aria-label="유튜브">YT</a>
-            <a href="#" target="_blank" rel="noopener" aria-label="카카오톡 채널">K</a>
           </div>
           <div class="ft-policy">
             <!-- [이용약관 숨김] 페이지 준비 후 주석 해제 : <a href="terms.html">이용약관</a> -->

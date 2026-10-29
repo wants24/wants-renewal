@@ -21,9 +21,9 @@
   }
   gsap.registerPlugin(ScrollTrigger);
 
-  var subs = hero.querySelectorAll('h2 .svc-visual-sub');
+  var subs = hero.querySelectorAll('h1 .svc-visual-sub');
   var line1 = subs[0], line3 = subs[1];
-  var big = hero.querySelector('h2 strong');
+  var big = hero.querySelector('h1 strong');
   var desc = hero.querySelector('p');
   var hint = hero.querySelector('.ab-scroll');
 
