@@ -32,7 +32,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <script>document.documentElement.classList.add('ab-anim'); /* ABOUT 스크롤 시나리오 초기 상태 (js/about.js) */</script>
+  <script>(function (d) { d.classList.add('js'); if (matchMedia('(min-width: 769px) and (hover: hover) and (pointer: fine)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches) d.classList.add('ab-anim'); })(document.documentElement); /* JS 실행 표시(css .js .reveal) + ABOUT 스크롤 시나리오(js/about.js) 초기 상태 : PC 연출 기준일 때만 (js/main.js WANTS_MQ) */</script>
   <!-- Google Analytics 4 : 측정 ID 는 js/analytics.js 의 GA_ID 한 곳에서 관리 -->
   <script src="js/analytics.js" async></script>
   <!-- 구조화 데이터 (JSON-LD) : 화면에 보이는 정보와 같게 유지 -->

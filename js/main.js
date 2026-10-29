@@ -1,6 +1,15 @@
 /* =========================================================
    WANTS Renewal - Common Script
    ========================================================= */
+
+/* 스크롤 연출 기준 (전 페이지 공통 · js/scroll.js · about.js · services.js · about/services 의 head 에서 같은 값 사용)
+   - full   : 화면 769px 이상 + 마우스·트랙패드(정밀 포인터) 환경 → PC 화면 고정(pin) · 스크롤 연동 연출
+   - simple : 그 밖(휴대폰 세로·가로, 터치 태블릿, 768px 이하로 줄인 창) → 묶음 단위 간단한 fade-in (아래 '간단한 등장 효과') */
+window.WANTS_MQ = {
+  full: '(min-width: 769px) and (hover: hover) and (pointer: fine)',
+  simple: 'not all and (min-width: 769px) and (hover: hover) and (pointer: fine)'
+};
+
 document.addEventListener('DOMContentLoaded', function () {
 
   /* ---------- Header : 스크롤 시 배경 ---------- */
@@ -117,7 +126,12 @@ document.addEventListener('DOMContentLoaded', function () {
   }, 600);
 
   var reveals = document.querySelectorAll('.reveal:not(.main-hero .reveal)');
-  if ('IntersectionObserver' in window) {
+  var simpleMQ = window.matchMedia(window.WANTS_MQ.simple);
+  var reduceFade = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (simpleMQ.matches && !reduceFade && 'IntersectionObserver' in window) {
+    // simple 모드 : 요소 하나씩 등장하는 .reveal 대신 아래 묶음 단위 등장 효과 사용
+    document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });
+  } else if ('IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
@@ -129,6 +143,64 @@ document.addEventListener('DOMContentLoaded', function () {
     reveals.forEach(function (el) { io.observe(el); });
   } else {
     reveals.forEach(function (el) { el.classList.add('in'); });
+  }
+
+  /* ---------- 간단한 등장 효과 (simple 모드 : 휴대폰 · 터치 태블릿 · window.WANTS_MQ) ----------
+     묶음 단위로만 아래에서 16px 올라오며 0.5초 페이드인 (css .m-fade)
+     - 제목 묶음 : 이어서 놓인 라벨 · 제목 · 설명 · 버튼을 한 번에
+     - 카드 · 목록 묶음 : 아래 M_BLOCKS (묶음 안의 문장·카드를 하나씩 따로 움직이지 않음)
+     JS 가 실행된 경우에만 숨김 상태를 붙이므로 스크립트가 실패해도 내용은 그대로 보임 · 모션 최소화 설정 시 사용 안 함
+     화면 크기·입력 환경이 바뀌면(창 크기 조절 등) 켜고 끔 */
+  var M_HEADS = '.sec-label, .sec-title, .sec-desc, .btn-fill, .svc-output-title, .svc-output-desc';
+  var M_BLOCKS = [
+    '.main-hero .inner', '.about-box-wrap', '.service-list', '.pf-list', '.insta-box', '.blog-list', '.main-cta .inner', // 메인 · FAQ 문의
+    '.ab-hero .inner', '.pb-head', '.pb-list', '.vl-head', '.vl-cards', '.ab-cta-box',                                  // ABOUT
+    '.svc-visual .inner', '.svc-headline', '.svc-plus', '.svc-block', '.svc-deliver', '.svc-proc-head', '.svc-steps', '.svc-cta-box', // SERVICES
+    '.faq-visual .inner', '.faq-head', '.faq-list',                                                                      // FAQ
+    '.ct-card', '.ct-form-wrap', '.ct-meta',                                                                             // CONTACT
+    '.policy-head', '.policy-toc', '.policy-body > section'                                                              // 개인정보처리방침
+  ].join(', ');
+  var mUnits = null, mIO = null;
+  function buildUnits() {
+    var blocks = Array.prototype.slice.call(document.querySelectorAll(M_BLOCKS));
+    blocks = blocks.filter(function (el) { return !blocks.some(function (b) { return b !== el && b.contains(el); }); }); // 바깥 묶음만
+    var inBlock = function (el) { return blocks.some(function (b) { return b.contains(el); }); };
+    var units = blocks.map(function (el) { return [el]; });
+    var used = [];
+    Array.prototype.forEach.call(document.querySelectorAll(M_HEADS), function (el) {
+      if (used.indexOf(el) > -1 || inBlock(el)) return;
+      var run = [el];
+      var next = el.nextElementSibling;
+      while (next && next.matches(M_HEADS)) { run.push(next); next = next.nextElementSibling; } // 이어진 제목 요소를 한 묶음으로
+      used = used.concat(run);
+      units.push(run);
+    });
+    return units;
+  }
+  function mEnable() {
+    if (!mUnits) mUnits = buildUnits();
+    mIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target._mUnit.forEach(function (el) { el.classList.add('m-in'); });
+        mIO.unobserve(entry.target);
+      });
+    }, { rootMargin: '0px 0px -8% 0px' });
+    mUnits.forEach(function (unit) {
+      unit.forEach(function (el) { el.classList.add('m-fade'); });
+      unit[0]._mUnit = unit;
+      mIO.observe(unit[0]);
+    });
+  }
+  function mDisable() {
+    if (mIO) { mIO.disconnect(); mIO = null; }
+    if (mUnits) mUnits.forEach(function (unit) { unit.forEach(function (el) { el.classList.remove('m-fade', 'm-in'); }); });
+  }
+  if (!reduceFade && 'IntersectionObserver' in window) {
+    if (simpleMQ.matches) mEnable();
+    var onModeChange = function () { if (simpleMQ.matches) mEnable(); else mDisable(); };
+    if (simpleMQ.addEventListener) simpleMQ.addEventListener('change', onModeChange);
+    else if (simpleMQ.addListener) simpleMQ.addListener(onModeChange);
   }
 
   /* ---------- 배경 동영상 : 화면 근처에서만 재생 (데이터·배터리 절약) ---------- */

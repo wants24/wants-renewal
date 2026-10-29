@@ -18,6 +18,11 @@
   gsap.registerPlugin(ScrollTrigger);
   document.documentElement.classList.add('gsap-on');
 
+  // 연출 기준 (js/main.js window.WANTS_MQ) : full = PC 화면 고정·스크롤 연동 연출 / simple = 휴대폰·터치 태블릿 (js/main.js 간단한 등장 효과)
+  // 아래 연출은 full 일 때만 실행 · 창 크기나 입력 환경이 바뀌면 gsap.matchMedia 가 자동으로 정리하고 다시 만듦
+  var MQ = window.WANTS_MQ || { full: '(min-width: 769px) and (hover: hover) and (pointer: fine)', simple: 'not all and (min-width: 769px) and (hover: hover) and (pointer: fine)' };
+  var mm = gsap.matchMedia();
+
   /* ---------- 1. Smooth Scroll (Lenis) ---------- */
   if (window.Lenis) {
     var lenis = new Lenis({ duration: 1.2, easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); } });
@@ -36,7 +41,8 @@
     scrollTrigger: { start: 0, end: 'max', scrub: 0.3 }
   });
 
-  /* ---------- 3. 섹션 타이틀 : 줄 단위 마스크 리빌 ---------- */
+  /* ---------- 3. 섹션 타이틀 : 줄 단위 마스크 리빌 (full) ---------- */
+  var lineTitles = [];
   document.querySelectorAll('.sec-title').forEach(function (title) {
     if (title.closest('.main-about')) return; // 섹션 2 는 타이핑 효과 (아래 3-1)
     title.classList.remove('reveal', 'd1', 'd2', 'd3');
@@ -44,9 +50,14 @@
       .split(/<br\s*\/?>/i)
       .map(function (line) { return '<span class="line"><span class="line-inner">' + line.trim() + '</span></span>'; })
       .join('');
-    gsap.from(title.querySelectorAll('.line-inner'), {
-      yPercent: 110, duration: 1.1, ease: 'power4.out', stagger: 0.12,
-      scrollTrigger: { trigger: title, start: 'top 85%' }
+    lineTitles.push(title);
+  });
+  mm.add(MQ.full, function () {
+    lineTitles.forEach(function (title) {
+      gsap.from(title.querySelectorAll('.line-inner'), {
+        yPercent: 110, duration: 1.1, ease: 'power4.out', stagger: 0.12,
+        scrollTrigger: { trigger: title, start: 'top 85%' }
+      });
     });
   });
 
@@ -101,31 +112,41 @@
       }, delay);
     };
 
-    ScrollTrigger.create({
-      trigger: typeTitle, start: 'top 80%', once: true,
-      onEnter: function () { typeNext(0); }
+    var typed = false; // 한 번 보여준 뒤에는 다시 타이핑하지 않음
+    mm.add(MQ.full, function () {
+      if (typed) return;
+      ScrollTrigger.create({
+        trigger: typeTitle, start: 'top 80%', once: true,
+        onEnter: function () { typed = true; typeNext(0); }
+      });
+    });
+    // simple : 타이핑 없이 완성된 제목 표시 (묶음 등장 효과는 js/main.js)
+    mm.add(MQ.simple, function () {
+      typed = true;
+      chars.forEach(function (c) { c.classList.add('on'); });
+      caret.classList.add('done');
     });
   }
 
-  /* ---------- 4. 공통 Fade-up (기존 .reveal 대체) ---------- */
+  /* ---------- 4. 공통 Fade-up (기존 .reveal 대체 · full) ---------- */
   var revealEls = gsap.utils.toArray('.reveal').filter(function (el) { return !el.closest('.main-hero'); });
   revealEls.forEach(function (el) { el.classList.remove('reveal'); });
-  gsap.set(revealEls, { autoAlpha: 0, y: 60 });
-  ScrollTrigger.batch(revealEls, {
-    start: 'top 88%',
-    once: true,
-    onEnter: function (batch) {
-      gsap.to(batch, { autoAlpha: 1, y: 0, duration: 1.1, ease: 'power3.out', stagger: 0.12, overwrite: true });
+  mm.add(MQ.full, function () {
+    gsap.set(revealEls, { autoAlpha: 0, y: 60 });
+    ScrollTrigger.batch(revealEls, {
+      start: 'top 88%',
+      once: true,
+      onEnter: function (batch) {
+        gsap.to(batch, { autoAlpha: 1, y: 0, duration: 1.1, ease: 'power3.out', stagger: 0.12, overwrite: true });
+      }
+    });
+
+    /* ---------- 4-1. FAQ 섹션 1 : 타이틀 → 서브 문구 → 설명 순서대로 아래에서 위로 등장 (페이지 진입 시) ---------- */
+    var faqIntro = gsap.utils.toArray('.faq-visual .inner > *');
+    if (faqIntro.length) {
+      gsap.from(faqIntro, { y: 60, autoAlpha: 0, duration: 1.1, ease: 'power3.out', stagger: 0.18, delay: 0.2 });
     }
   });
-
-  /* ---------- 4-1. FAQ 섹션 1 : 타이틀 → 서브 문구 → 설명 순서대로 아래에서 위로 등장 (페이지 진입 시) ---------- */
-  var faqIntro = gsap.utils.toArray('.faq-visual .inner > *');
-  if (faqIntro.length) {
-    gsap.from(faqIntro, { y: 60, autoAlpha: 0, duration: 1.1, ease: 'power3.out', stagger: 0.18, delay: 0.2 });
-  }
-
-  var mm = gsap.matchMedia();
 
   /* ---------- 5. 섹션 1 → 2 → 3 → 4 : 고정(Pin) + 머무름 + 다음 섹션이 위로 덮으며 어두워지는 전환 ---------- */
   // 머무름 구간 : 섹션이 화면에 다 보인 상태로 이 거리만큼 스크롤해도 그대로 유지된 뒤 다음 섹션이 올라옴
@@ -166,9 +187,13 @@
       stacks.splice(stacks.indexOf(stack), 1);
     };
   };
-  ['.main-hero', '.main-about', '.faq-visual'].forEach(function (sel) { // .faq-visual : FAQ 섹션 1 → 2 (메인 섹션 2 → 3 과 같은 전환)
-    var section = document.querySelector(sel);
-    if (section) stackOver(section);
+  mm.add(MQ.full, function () {
+    var releases = [];
+    ['.main-hero', '.main-about', '.faq-visual'].forEach(function (sel) { // .faq-visual : FAQ 섹션 1 → 2 (메인 섹션 2 → 3 과 같은 전환)
+      var section = document.querySelector(sel);
+      if (section) releases.push(stackOver(section));
+    });
+    return function () { releases.forEach(function (release) { release(); }); }; // 해제 시 다음 섹션 여백 원복
   });
 
   // 섹션 3 : 머무는 동안 스크롤에 따라 카드 hover 효과를 순서대로 표시
@@ -178,7 +203,7 @@
     serviceLis.forEach(function (li, k) { li.classList.toggle('on', k === idx); });
   };
   if (serviceSec && serviceLis.length) {
-    mm.add('(min-width: 1025px)', function () {
+    mm.add(MQ.full + ' and (min-width: 1025px)', function () {
       var release = stackOver(serviceSec, {
         holdRatio: function () { return HOLD_SERVICE_PC; },
         onHold: function (p) {
@@ -188,8 +213,8 @@
       });
       return function () { release(); setActiveCard(-1); };
     });
-    // 모바일/태블릿 : 고정 없이, 카드가 화면 가운데를 지날 때 순서대로 강조
-    mm.add('(max-width: 1024px)', function () {
+    // 좁은 PC 창(769~1024px) : 고정 없이, 카드가 화면 가운데를 지날 때 순서대로 강조 (휴대폰·태블릿은 js/main.js 간단한 등장 효과)
+    mm.add('(min-width: 769px) and (max-width: 1024px) and (hover: hover) and (pointer: fine)', function () {
       serviceLis.forEach(function (li, k) {
         ScrollTrigger.create({
           trigger: li, start: 'top 60%', end: 'bottom 40%',
@@ -205,37 +230,39 @@
     stacks.forEach(function (st) { if (st.next) st.next.style.marginTop = st.getHold() + 'px'; });
   });
 
-  /* ---------- 6. 섹션 2 : 임시 비주얼 패럴랙스 ---------- */
-  var aboutVisual = document.querySelector('.main-about .about-visual');
-  if (aboutVisual) {
-    gsap.fromTo(aboutVisual, { y: 120, rotate: -8 }, {
-      y: -120, rotate: 8, ease: 'none',
-      scrollTrigger: { trigger: '.main-about', start: 'top bottom', end: 'bottom top', scrub: TUNE.scrub || true }
-    });
-  }
+  mm.add(MQ.full, function () { // 6 ~ 7 : full
+    /* ---------- 6. 섹션 2 : 임시 비주얼 패럴랙스 ---------- */
+    var aboutVisual = document.querySelector('.main-about .about-visual');
+    if (aboutVisual) {
+      gsap.fromTo(aboutVisual, { y: 120, rotate: -8 }, {
+        y: -120, rotate: 8, ease: 'none',
+        scrollTrigger: { trigger: '.main-about', start: 'top bottom', end: 'bottom top', scrub: TUNE.scrub || true }
+      });
+    }
 
-  /* ---------- 7. 섹션 3 : 배경 이미지 제자리 페이드인 + 서비스 카드 순차 등장 ---------- */
-  var serviceSection = document.querySelector('.main-service');
-  if (serviceSection) {
-    gsap.fromTo(serviceSection, { '--bg-op': 0 }, {
-      '--bg-op': 1, duration: 1.8, ease: 'power2.inOut',
-      scrollTrigger: { trigger: serviceSection, start: 'top 70%', toggleActions: 'play none none reverse' }
-    });
-  }
-  var serviceCards = gsap.utils.toArray('.service-list li');
-  if (serviceCards.length) {
-    gsap.from(serviceCards, {
-      y: 80, scale: 0.92, autoAlpha: 0, duration: 1, ease: 'power3.out', stagger: 0.08,
-      scrollTrigger: { trigger: '.service-list', start: 'top 85%' }
-    });
-  }
-  var serviceVisual = document.querySelector('.main-service .service-visual');
-  if (serviceVisual) {
-    gsap.fromTo(serviceVisual, { y: 150, scale: 0.85 }, {
-      y: -100, scale: 1.05, ease: 'none',
-      scrollTrigger: { trigger: '.main-service', start: 'top bottom', end: 'bottom top', scrub: TUNE.scrub || true }
-    });
-  }
+    /* ---------- 7. 섹션 3 : 배경 이미지 제자리 페이드인 + 서비스 카드 순차 등장 ---------- */
+    var serviceSection = document.querySelector('.main-service');
+    if (serviceSection) {
+      gsap.fromTo(serviceSection, { '--bg-op': 0 }, {
+        '--bg-op': 1, duration: 1.8, ease: 'power2.inOut',
+        scrollTrigger: { trigger: serviceSection, start: 'top 70%', toggleActions: 'play none none reverse' }
+      });
+    }
+    var serviceCards = gsap.utils.toArray('.service-list li');
+    if (serviceCards.length) {
+      gsap.from(serviceCards, {
+        y: 80, scale: 0.92, autoAlpha: 0, duration: 1, ease: 'power3.out', stagger: 0.08,
+        scrollTrigger: { trigger: '.service-list', start: 'top 85%' }
+      });
+    }
+    var serviceVisual = document.querySelector('.main-service .service-visual');
+    if (serviceVisual) {
+      gsap.fromTo(serviceVisual, { y: 150, scale: 0.85 }, {
+        y: -100, scale: 1.05, ease: 'none',
+        scrollTrigger: { trigger: '.main-service', start: 'top bottom', end: 'bottom top', scrub: TUNE.scrub || true }
+      });
+    }
+  }); // 6 ~ 7 : full
 
   /* ---------- 8. 섹션 4 : 작업 목록 · 커서를 따라오는 사진 미리보기 (마우스 사용 PC) ---------- */
   var pfList = document.querySelector('.pf-list');
@@ -376,38 +403,40 @@
     });
   }
 
-  /* ---------- 9. 섹션 5 : 인스타 그리드 / 블로그 카드 ---------- */
-  var instaItems = gsap.utils.toArray('.insta-grid li');
-  if (instaItems.length) {
-    gsap.from(instaItems, {
-      scale: 0.8, autoAlpha: 0, duration: 0.9, ease: 'back.out(1.6)', stagger: { each: 0.08, from: 'random' },
-      scrollTrigger: { trigger: '.insta-grid', start: 'top 85%' }
-    });
-  }
-  var blogItems = gsap.utils.toArray('.blog-list li');
-  if (blogItems.length) {
-    gsap.from(blogItems, {
-      x: 60, autoAlpha: 0, duration: 1, ease: 'power3.out', stagger: 0.12,
-      scrollTrigger: { trigger: '.blog-list', start: 'top 85%' }
-    });
-  }
+  mm.add(MQ.full, function () { // 9 ~ 11 : full
+    /* ---------- 9. 섹션 5 : 인스타 그리드 / 블로그 카드 ---------- */
+    var instaItems = gsap.utils.toArray('.insta-grid li');
+    if (instaItems.length) {
+      gsap.from(instaItems, {
+        scale: 0.8, autoAlpha: 0, duration: 0.9, ease: 'back.out(1.6)', stagger: { each: 0.08, from: 'random' },
+        scrollTrigger: { trigger: '.insta-grid', start: 'top 85%' }
+      });
+    }
+    var blogItems = gsap.utils.toArray('.blog-list li');
+    if (blogItems.length) {
+      gsap.from(blogItems, {
+        x: 60, autoAlpha: 0, duration: 1, ease: 'power3.out', stagger: 0.12,
+        scrollTrigger: { trigger: '.blog-list', start: 'top 85%' }
+      });
+    }
 
-  /* ---------- 10. CTA : 화면 가득 펼쳐지는 전환 ---------- */
-  gsap.utils.toArray('.main-cta').forEach(function (cta) {
-    gsap.fromTo(cta, { clipPath: 'inset(0% 8% 0% 8% round 40px)' }, {
-      clipPath: 'inset(0% 0% 0% 0% round 0px)', ease: 'none',
-      scrollTrigger: { trigger: cta, start: 'top bottom', end: 'top 30%', scrub: TUNE.scrub || true }
+    /* ---------- 10. CTA : 화면 가득 펼쳐지는 전환 ---------- */
+    gsap.utils.toArray('.main-cta').forEach(function (cta) {
+      gsap.fromTo(cta, { clipPath: 'inset(0% 8% 0% 8% round 40px)' }, {
+        clipPath: 'inset(0% 0% 0% 0% round 0px)', ease: 'none',
+        scrollTrigger: { trigger: cta, start: 'top bottom', end: 'top 30%', scrub: TUNE.scrub || true }
+      });
     });
-  });
 
-  /* ---------- 11. 서브 비주얼 : 타이틀 패럴랙스 ---------- */
-  var subVisual = document.querySelector('.sub-visual:not(.svc-visual)'); // SERVICES 섹션1은 js/services.js 의 스크롤 연출 사용
-  if (subVisual) {
-    gsap.to(subVisual.children, {
-      y: 80, autoAlpha: 0, ease: 'none',
-      scrollTrigger: { trigger: subVisual, start: 'top top', end: 'bottom top', scrub: TUNE.scrub || true }
-    });
-  }
+    /* ---------- 11. 서브 비주얼 : 타이틀 패럴랙스 ---------- */
+    var subVisual = document.querySelector('.sub-visual:not(.svc-visual)'); // SERVICES 섹션1은 js/services.js 의 스크롤 연출 사용
+    if (subVisual) {
+      gsap.to(subVisual.children, {
+        y: 80, autoAlpha: 0, ease: 'none',
+        scrollTrigger: { trigger: subVisual, start: 'top top', end: 'bottom top', scrub: TUNE.scrub || true }
+      });
+    }
+  }); // 9 ~ 11 : full
 
   /* ---------- 12. 커스텀 커서 (마우스 사용 환경만 · body.default-cursor 페이지는 기본 커서 사용) ---------- */
   if (!document.body.classList.contains('default-cursor')) mm.add('(hover: hover) and (pointer: fine)', function () {

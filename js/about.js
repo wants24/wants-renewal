@@ -16,6 +16,9 @@
 
   var mm = gsap.matchMedia();
   var toArr = function (list) { return Array.prototype.slice.call(list); };
+  // 연출 기준 (js/main.js window.WANTS_MQ) : full = PC 화면 고정·스크롤 연동 연출 / simple = 휴대폰·터치 태블릿 (js/main.js 간단한 등장 효과)
+  var MQ = window.WANTS_MQ || { full: '(min-width: 769px) and (hover: hover) and (pointer: fine)', simple: 'not all and (min-width: 769px) and (hover: hover) and (pointer: fine)' };
+  var MQ_WIDE = MQ.full + ' and (min-width: 1025px)'; // 섹션 2 · 3 화면 고정 연출 (넓은 PC)
 
   /* 스크롤 속도 : 메인 페이지(머무름 0.8화면, 카드당 약 0.3화면)와 비슷한 체감이 되도록
      요소 하나가 등장하는 데 약 0.5화면, 큰 전환(확장·이동)에 약 1화면을 사용 */
@@ -100,52 +103,68 @@
     var r1 = function () { return Math.ceil(Math.sqrt(Math.pow(window.innerWidth, 2) + Math.pow(window.innerHeight, 2)) / 2) + 10; };
 
     var typing = createTyping(heroDesc);
-    var typingProxy = { p: 0 };
-    gsap.set(heroDesc, { autoAlpha: 1 }); // 글자 단위로 숨김 (.char)
-
-    var heroTl = gsap.timeline()
-      .to('.ab-scroll', { autoAlpha: 0, duration: 0.2, ease: 'none' }, 0)
-      // ① 원형 마스크 확장 (1.2화면)
-      .fromTo(heroBg,
-        { clipPath: function () { return 'circle(' + r0() + 'px at 50% 50%)'; } },
-        { clipPath: function () { return 'circle(' + r1() + 'px at 50% 50%)'; }, ease: 'power2.inOut', duration: 1.2 }, 0)
-      .fromTo('.ab-hero-img', { scale: 1.25 }, { scale: 1, ease: 'power2.inOut', duration: 1.2 }, 0)
-      .fromTo('.ab-hero-dim', { autoAlpha: 0 }, { autoAlpha: 1, ease: 'none', duration: 0.6 }, 0.6)
-      // ② 타이틀 ← 좌측
-      .fromTo('.ab-hero-title', { x: -140, autoAlpha: 0 }, { x: 0, autoAlpha: 1, ease: 'power3.out', duration: 0.5 }, 1.3)
-      // ③ 메인 카피 ← 우측
-      .fromTo('.ab-hero-copy', { x: 140, autoAlpha: 0 }, { x: 0, autoAlpha: 1, ease: 'power3.out', duration: 0.5 }, 1.9)
-      // ④ 서브 문구 : 스크롤한 만큼 타이핑 (글자당 약 0.022화면 → 79자 약 1.7화면, 되돌리면 지워짐)
-      .fromTo(typingProxy, { p: 0 }, { p: 1, ease: 'none', duration: typing.count * 0.022, onUpdate: function () { typing.setProgress(typingProxy.p); } }, 2.5)
-      .to({}, { duration: 0.3 }); // 문구가 완결된 화면에서 잠깐 머문 뒤 섹션 2 로
-
-    /* 섹션 1 → 2 전환 : 메인 페이지 섹션 1 → 2 와 같은 효과
-       (섹션 1 은 고정된 채로 섹션 2 가 아래에서 올라와 덮고, 그동안 섹션 1 은 어두워지며 텍스트가 사라짐) */
-    var heroAnimLen = function () { return Math.round(heroTl.duration() * window.innerHeight * pace()); }; // 섹션 1 연출 구간
-    var heroNext = hero.nextElementSibling;
-    var setHeroGap = function () { if (heroNext) heroNext.style.marginTop = heroAnimLen() + 'px'; }; // 연출이 끝난 뒤 섹션 2 가 올라오도록 (투명 여백)
-    setHeroGap();
-    ScrollTrigger.addEventListener('refreshInit', setHeroGap);
-
-    // ① 연출 : 스크롤 진행률과 글자 수를 맞춤 (휠을 빠르게 내려도 지연을 두고 부드럽게 따라와 타이핑이 보이도록)
-    ScrollTrigger.create({
-      trigger: hero, start: 0, end: heroAnimLen,
-      animation: heroTl, scrub: TUNE.scrub || true, invalidateOnRefresh: true, refreshPriority: 4
+    // simple : 연출 없이 완성된 첫 화면 (html.ab-anim 없음 → 원형 마스크 없이 전체 이미지 · 문구 표시)
+    mm.add(MQ.simple, function () {
+      root.classList.remove('ab-anim');
+      typing.setProgress(1);
     });
-    // ② 고정 : 연출 구간 + 섹션 2 가 화면을 다 덮을 때까지 (pinSpacing: false → 섹션 2 가 위로 겹쳐 올라옴)
-    ScrollTrigger.create({
-      trigger: hero, start: 0, end: function () { return heroAnimLen() + window.innerHeight; },
-      pin: true, pinSpacing: false, invalidateOnRefresh: true, refreshPriority: 4
+
+    mm.add(MQ.full, function () {
+      root.classList.add('ab-anim'); // 연출 초기 상태 (about.html head 에서도 같은 기준으로 미리 붙임)
+      var typingProxy = { p: 0 };
+      gsap.set(heroDesc, { autoAlpha: 1 }); // 글자 단위로 숨김 (.char)
+
+      var heroTl = gsap.timeline()
+        .to('.ab-scroll', { autoAlpha: 0, duration: 0.2, ease: 'none' }, 0)
+        // ① 원형 마스크 확장 (1.2화면)
+        .fromTo(heroBg,
+          { clipPath: function () { return 'circle(' + r0() + 'px at 50% 50%)'; } },
+          { clipPath: function () { return 'circle(' + r1() + 'px at 50% 50%)'; }, ease: 'power2.inOut', duration: 1.2 }, 0)
+        .fromTo('.ab-hero-img', { scale: 1.25 }, { scale: 1, ease: 'power2.inOut', duration: 1.2 }, 0)
+        .fromTo('.ab-hero-dim', { autoAlpha: 0 }, { autoAlpha: 1, ease: 'none', duration: 0.6 }, 0.6)
+        // ② 타이틀 ← 좌측
+        .fromTo('.ab-hero-title', { x: -140, autoAlpha: 0 }, { x: 0, autoAlpha: 1, ease: 'power3.out', duration: 0.5 }, 1.3)
+        // ③ 메인 카피 ← 우측
+        .fromTo('.ab-hero-copy', { x: 140, autoAlpha: 0 }, { x: 0, autoAlpha: 1, ease: 'power3.out', duration: 0.5 }, 1.9)
+        // ④ 서브 문구 : 스크롤한 만큼 타이핑 (글자당 약 0.022화면 → 79자 약 1.7화면, 되돌리면 지워짐)
+        .fromTo(typingProxy, { p: 0 }, { p: 1, ease: 'none', duration: typing.count * 0.022, onUpdate: function () { typing.setProgress(typingProxy.p); } }, 2.5)
+        .to({}, { duration: 0.3 }); // 문구가 완결된 화면에서 잠깐 머문 뒤 섹션 2 로
+
+      /* 섹션 1 → 2 전환 : 메인 페이지 섹션 1 → 2 와 같은 효과
+         (섹션 1 은 고정된 채로 섹션 2 가 아래에서 올라와 덮고, 그동안 섹션 1 은 어두워지며 텍스트가 사라짐) */
+      var heroAnimLen = function () { return Math.round(heroTl.duration() * window.innerHeight * pace()); }; // 섹션 1 연출 구간
+      var heroNext = hero.nextElementSibling;
+      var setHeroGap = function () { if (heroNext) heroNext.style.marginTop = heroAnimLen() + 'px'; }; // 연출이 끝난 뒤 섹션 2 가 올라오도록 (투명 여백)
+      setHeroGap();
+      ScrollTrigger.addEventListener('refreshInit', setHeroGap);
+
+      // ① 연출 : 스크롤 진행률과 글자 수를 맞춤 (휠을 빠르게 내려도 지연을 두고 부드럽게 따라와 타이핑이 보이도록)
+      ScrollTrigger.create({
+        trigger: hero, start: 0, end: heroAnimLen,
+        animation: heroTl, scrub: TUNE.scrub || true, invalidateOnRefresh: true, refreshPriority: 4
+      });
+      // ② 고정 : 연출 구간 + 섹션 2 가 화면을 다 덮을 때까지 (pinSpacing: false → 섹션 2 가 위로 겹쳐 올라옴)
+      ScrollTrigger.create({
+        trigger: hero, start: 0, end: function () { return heroAnimLen() + window.innerHeight; },
+        pin: true, pinSpacing: false, invalidateOnRefresh: true, refreshPriority: 4
+      });
+      // ③ 덮이는 동안 : 0 → 0.9 어두워짐 + 텍스트 페이드아웃
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: hero, start: heroAnimLen, end: function () { return heroAnimLen() + window.innerHeight; },
+          scrub: TUNE.scrub || 1, invalidateOnRefresh: true, refreshPriority: 4
+        }
+      })
+        .fromTo(hero, { '--dim': 0 }, { '--dim': 0.9, ease: 'power1.in', duration: 1 }, 0)
+        .fromTo(hero.querySelector('.inner'), { autoAlpha: 1 }, { autoAlpha: 0, ease: 'none', duration: 0.6 }, 0);
+
+      // 해제(창 크기 · 입력 환경 변경) 시 정리 : 섹션 2 여백 · 초기 상태 클래스 원복
+      return function () {
+        ScrollTrigger.removeEventListener('refreshInit', setHeroGap);
+        if (heroNext) heroNext.style.marginTop = '';
+        root.classList.remove('ab-anim');
+      };
     });
-    // ③ 덮이는 동안 : 0 → 0.9 어두워짐 + 텍스트 페이드아웃
-    gsap.timeline({
-      scrollTrigger: {
-        trigger: hero, start: heroAnimLen, end: function () { return heroAnimLen() + window.innerHeight; },
-        scrub: TUNE.scrub || 1, invalidateOnRefresh: true, refreshPriority: 4
-      }
-    })
-      .fromTo(hero, { '--dim': 0 }, { '--dim': 0.9, ease: 'power1.in', duration: 1 }, 0)
-      .fromTo(hero.querySelector('.inner'), { autoAlpha: 1 }, { autoAlpha: 0, ease: 'none', duration: 0.6 }, 0);
   }
 
   /* ---------- 섹션 2 : 가운데 타이틀 → 서브 문구 순차 등장 → 좌측 박스로 축소 이동 → 우측 카드 순차 등장 (PC) ---------- */
@@ -169,7 +188,10 @@
     var SUB_DUR = 0.5;
     var BOX_START = SUB_START + SUB_DUR + 0.5;     // 서브 문구가 보인 채 잠깐 머문 뒤 박스로 축소 이동 (기존 2.3 위치)
 
-    mm.add('(min-width: 1025px)', function () {
+    // 넓은 화면이지만 연출을 쓰지 않을 때(터치 태블릿 등) : 타이핑 없이 완성된 타이틀 (css .pb-title .char 는 1025px 이상에서 숨김)
+    mm.add('not all and (min-width: 1025px) and (hover: hover) and (pointer: fine)', function () { titleTyping.setProgress(1); });
+
+    mm.add(MQ_WIDE, function () {
       // 박스(최종 위치)를 기준으로 '화면 가운데 큰 타이틀' 위치를 역산 (transform 영향 없는 offset 값 사용)
       // 박스에 transform 이 걸리면 타이틀의 offsetParent 가 박스로 바뀌므로 안쪽 여백은 padding 값으로 계산
       var pad = function (side) { return parseFloat(getComputedStyle(pbHead)['padding' + side]) || 0; };
@@ -230,7 +252,7 @@
     setStrip();
     ScrollTrigger.addEventListener('refreshInit', setStrip);
 
-    mm.add('(min-width: 1025px)', function () {
+    mm.add(MQ_WIDE, function () {
       var thumbW = function () { return Math.max(220, Math.min(304, window.innerWidth * 0.16)); };
       var thumbH = function () { return thumbW() * 0.68; };
       var titleX = function () { return vlStage.clientWidth / 2 - lineWidth(vlLines) * VL_SCALE / 2 - vlTitle.offsetLeft; };
@@ -270,8 +292,8 @@
     });
   }
 
-  /* ---------- 모바일 / 태블릿 : 고정 없이 아래에서 순차 등장 ---------- */
-  mm.add('(max-width: 1024px)', function () {
+  /* ---------- 좁은 PC 창(769~1024px) : 고정 없이 아래에서 순차 등장 (휴대폰 · 터치 태블릿은 js/main.js 간단한 등장 효과) ---------- */
+  mm.add('(min-width: 769px) and (max-width: 1024px) and (hover: hover) and (pointer: fine)', function () {
     gsap.utils.toArray('.pb-head, .pb-list li, .vl-head, .vl-cards').forEach(function (el) {
       gsap.from(el, {
         y: 50, autoAlpha: 0, duration: 1, ease: 'power3.out',
@@ -286,7 +308,7 @@
 
   /* ---------- 섹션 4 : CTA 박스가 스크롤에 따라 가운데에서 양옆·위아래로 펼쳐짐 → 문구 순차 등장 ---------- */
   var ctaBox = document.querySelector('.ab-cta-box');
-  if (ctaBox) {
+  if (ctaBox) mm.add(MQ.full, function () {
     // 박스 펼침 : 스크롤 연동 (위로 떠오르며 좁은 캡슐 → 원래 크기)
     gsap.fromTo(ctaBox,
       { clipPath: 'inset(18% 30% 18% 30% round 200px)', y: 80 },
@@ -300,7 +322,7 @@
       y: 0, autoAlpha: 1, duration: 0.8, ease: 'power3.out', stagger: 0.12,
       scrollTrigger: { trigger: ctaBox, start: 'top 62%', toggleActions: 'play none none reverse' }
     });
-  }
+  });
 
   /* 웹폰트 적용 후 타이틀 폭이 바뀌므로 위치 재계산 */
   if (document.fonts && document.fonts.ready) {
